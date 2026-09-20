@@ -1,0 +1,39 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Media / Uploads
+media/
+uploads/
+
+# Machine Learning models & large files
+*.pkl
+*.h5
+*.hdf5
+*.model
+featurevector.pkl
+filenames.pkl
+
+# Node / JS
+node_modules/
+npm-debug.log
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo

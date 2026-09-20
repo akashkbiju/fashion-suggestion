@@ -1,0 +1,34 @@
+<!-- templates/fashion/results.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Fashion Recommendations</h1>
+    
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Uploaded Image</h5>
+                </div>
+                <img src="{{ uploaded_image }}" class="card-img-top" alt="Uploaded Fashion Item">
+            </div>
+        </div>
+    </div>
+    
+    <h2 class="text-center mb-4">Similar Items</h2>
+    <div class="row">
+        {% for image in recommended_images %}
+        <div class="col-md-2 mb-3">
+            <div class="card">
+                <img src="{% url 'serve_fashion_image' image %}" class="card-img-top" alt="Recommended Fashion Item">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-4">
+        <a href="{% url 'fashion_recommend' %}" class="btn btn-primary">Try Another Image</a>
+    </div>
+</div>
+{% endblock %}

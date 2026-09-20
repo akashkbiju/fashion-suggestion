@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-3  gap-6" style="
+    align-content: center;
+    justify-content: center;
+    display: flex;
+">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">Outfit Recommendation</h2>
+            <p class="text-gray-600 mb-4">Chat with the Fitfusion AI for recs</p>
+            <a href="{% url 'file_review' %}" class="btn bg-blue-500 text-white px-4 py-2 rounded">Start</a>
+        </div>
+        
+        
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">Cloth piece Recommendation</h2>
+            <p class="text-gray-600 mb-4">Give your Fav apparels to get similiar ones </p>
+            <a href="{% url 'fashion_recommend' %}" class="btn bg-purple-500 text-white px-4 py-2 rounded">Go</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

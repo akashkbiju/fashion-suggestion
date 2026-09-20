@@ -1,0 +1,150 @@
+
+
+
+{% extends 'base.html' %}
+{% block content %}
+
+<!DOCTYPE html>
+
+    <div class="container">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <form method="POST" class="space-y-4">
+                <label for="code_input" class="block text-lg font-medium mb-2">Enter your code for plagiarism checking:</label>
+                <textarea 
+                    id="code_input" 
+                    name="code_input" 
+                    rows="15"
+                    class="w-full p-4 text-base hidden"
+                    placeholder="Type your code here..."
+                ></textarea>
+                <div id="editor" class="w-full border p-2"></div>
+            </form>
+        </div>
+
+        <div class="mt-4 text-center text-sm text-gray-500">
+            Your code will be automatically checked after 5 seconds of inactivity
+        </div>
+    </div>
+
+    <!-- Include CodeMirror Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/solarized.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/eclipse.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/cobalt.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/ambiance.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/solarized.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/night.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+
+    <script>
+        let typingTimeout;
+        let isTyping = false;
+        
+        // Initialize CodeMirror
+        const editor = CodeMirror(document.getElementById("editor"), {
+            mode: "python",
+            lineNumbers: true,
+            matchBrackets: true,
+            autoCloseBrackets: true,
+           // theme: "dracula"
+           theme: "dracula"  // Using monokai theme here
+        });
+        
+        editor.on("keydown", () => {
+            isTyping = true;
+            clearTimeout(typingTimeout);
+        });
+
+        editor.on("keyup", () => {
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                if (isTyping) {
+                    isTyping = false;
+                    const codeContent = editor.getValue();
+                    document.getElementById("code_input").value = codeContent;
+                    
+                    fetch('/live-review/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ code_input: codeContent })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const review = `\n\n# Code Review:\n# ${data.review}\n\n`;
+                        editor.setValue(editor.getValue() + review);
+                    });
+                }
+            }, 5000);
+        });
+    </script>
+
+{% endblock %}
+
+
+
+{% comment %} {% extends 'base.html' %}
+{% block content %}
+
+<!DOCTYPE html>
+
+
+   
+    <div class="container">
+
+
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <form method="POST" class="space-y-4">
+                <label for="code_input" class="block text-lg font-medium mb-2">Enter your Python code:</label>
+                <textarea 
+                    id="code_input" 
+                    name="code_input" 
+                    rows="15"
+                    class="w-full p-4 text-base"
+                    placeholder="Type your code here..."
+                ></textarea>
+            </form>
+        </div>
+
+        <div class="mt-4 text-center text-sm text-gray-500">
+            Your code will be automatically reviewed after 5 seconds of inactivity
+        </div>
+    </div>
+
+    <!-- JavaScript for detecting typing and sending requests -->
+    <script>
+        let typingTimeout;
+
+        const handleTyping = () => {
+            clearTimeout(typingTimeout);
+
+            typingTimeout = setTimeout(() => {
+                const codeContent = document.getElementById("code_input").value;
+
+                fetch('/live-review/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code_input: codeContent })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const codeInput = document.getElementById("code_input");
+                    const review = `\n\n# Code Review:\n# ${data.review}\n\n`;
+                    codeInput.value += review;
+                });
+            }, 5000);
+        };
+
+        document.getElementById("code_input").addEventListener("input", handleTyping);
+    </script>
+
+
+{% endblock %} {% endcomment %}
