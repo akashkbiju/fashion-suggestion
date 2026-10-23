@@ -29,7 +29,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-a*s)!=m@j*k5l^&w0ea9+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
 
 
 # Application definition
