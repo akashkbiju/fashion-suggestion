@@ -431,8 +431,12 @@ def recommend(features, feature_list):
     distance, indices = neighbors.kneighbors([features])
     return indices
 
+@login_required
 def fashion_recommend(request):
-    if request.method == 'POST' and request.FILES['image']:
+    if request.method == 'POST' and 'image' in request.FILES:
+        if not check_query_limit(request.user):
+            messages.error(request, 'Monthly query limit reached. Please contact admin to upgrade.')
+            return render(request, 'fashion/upload.html')
         uploaded_file = request.FILES['image']
         fs = FileSystemStorage()
         
