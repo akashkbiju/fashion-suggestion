@@ -465,6 +465,7 @@ def fashion_recommend(request):
     
     return render(request, 'fashion/upload.html')
 
+@login_required
 def serve_fashion_image(request, image_name):
     """View to serve fashion images directly"""
     image_path = os.path.join(IMAGES_DIR, image_name)
