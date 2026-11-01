@@ -1,43 +1,417 @@
-<!-- templates/code_review/login.html -->
-{% extends 'base.html' %}
-{% block content %}
-<div class="min-h-screen flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Sign in to your account
-            </h2>
-        </div>
-        <form class="mt-8 space-y-6" method="POST">
-            {% csrf_token %}
-            <div class="rounded-md shadow-sm -space-y-px">
-                <div>
-                    <label for="username" class="sr-only">Username</label>
-                    <input id="username" name="username" type="text" required 
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Username">
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In &bull; FitFusion AI Stylist</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fdf4f7',
+                            100: '#fbe8ef',
+                            500: '#e11d48',
+                            600: '#be123c',
+                            900: '#4c0519',
+                        },
+                        accent: {
+                            purple: '#6366f1',
+                            indigo: '#4f46e5',
+                            dark: '#0b0f19',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+            color: #0f172a;
+        }
+
+        /* Ambient Glow & Mesh Gradient */
+        .ambient-mesh {
+            background: radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.25) 0%, transparent 40%),
+                        radial-gradient(circle at 85% 75%, rgba(225, 29, 72, 0.2) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 55%),
+                        #0b0f19;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .dark-glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom Floating Animation */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+
+        .brand-gradient-text {
+            background: linear-gradient(135deg, #f43f5e 0%, #a855f7 50%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #e11d48 0%, #9333ea 50%, #4f46e5 100%);
+            background-size: 200% auto;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-gradient:hover {
+            background-position: right center;
+            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .input-glow:focus-within {
+            box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen ambient-mesh flex items-center justify-center p-4 sm:p-6 lg:p-8">
+
+    <!-- Back to Home Floating Pill -->
+    <a href="{% url 'home' %}" class="fixed top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 text-xs font-semibold tracking-wider text-gray-300 uppercase bg-slate-900/80 hover:bg-slate-800 backdrop-blur-md border border-white/10 rounded-full transition-all duration-300 hover:text-white hover:border-white/30 shadow-lg">
+        <i class="fa-solid fa-arrow-left text-[10px]"></i>
+        <span>Back to Home</span>
+    </a>
+
+    <!-- Main Auth Shell -->
+    <div class="w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row my-auto border border-white/10 bg-slate-900/40 backdrop-blur-2xl">
+        
+        <!-- Left Side: Editorial & Fashion AI Showcase -->
+        <div class="hidden lg:flex lg:w-1/2 relative p-12 flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-purple-950/40 to-slate-950">
+            <!-- Background Radial Glows -->
+            <div class="absolute -top-24 -left-24 w-80 h-80 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Top Header on Showcase -->
+            <div class="relative z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-rose-500/30">
+                        <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                    </div>
+                    <span class="text-2xl font-bold tracking-tight text-white">FitFusion<span class="text-rose-500">.ai</span></span>
                 </div>
-                <div>
-                    <label for="password" class="sr-only">Password</label>
-                    <input id="password" name="password" type="password" required 
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Password">
+                <div class="inline-flex items-center gap-2 mt-4 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-rose-300">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                    Next-Gen AI Wardrobe & Outfit Intelligence
                 </div>
             </div>
 
-            <div>
-                <button type="submit" 
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Sign in
+            <!-- Central Visual: Floating Mockup Outfit Recommendation Card -->
+            <div class="relative z-10 my-8">
+                <div class="dark-glass-card rounded-2xl p-6 shadow-2xl border border-white/10 animate-float">
+                    <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                                <i class="fa-solid fa-sparkles text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Daily Style Recommendation</h4>
+                                <p class="text-xs text-gray-400">Curated for Smart-Casual Elegance</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            98% Match
+                        </span>
+                    </div>
+
+                    <div class="mt-4 space-y-2.5 text-xs">
+                        <div class="flex items-center gap-3 text-gray-300 bg-white/5 p-2.5 rounded-xl">
+                            <i class="fa-solid fa-shirt text-rose-400 w-4 text-center"></i>
+                            <span class="flex-1"><strong class="text-white">Top:</strong> Cuban Collar Overshirt in Olive</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-gray-300 bg-white/5 p-2.5 rounded-xl">
+                            <i class="fa-solid fa-vest text-indigo-400 w-4 text-center"></i>
+                            <span class="flex-1"><strong class="text-white">Bottom:</strong> Tailored Straight Trousers</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-gray-300 bg-white/5 p-2.5 rounded-xl">
+                            <i class="fa-solid fa-shoe-prints text-amber-400 w-4 text-center"></i>
+                            <span class="flex-1"><strong class="text-white">Footwear:</strong> Minimalist Leather Low-Tops</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating Micro Badges -->
+                <div class="absolute -bottom-5 -right-4 dark-glass-card px-4 py-2.5 rounded-xl shadow-xl border border-white/10 flex items-center gap-3">
+                    <div class="flex -space-x-2">
+                        <div class="w-6 h-6 rounded-full bg-rose-500 flex items-center justify-center text-[10px] text-white">👗</div>
+                        <div class="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-[10px] text-white">✨</div>
+                        <div class="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] text-white">👠</div>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-200">10,000+ Curated Inspo Pieces</span>
+                </div>
+            </div>
+
+            <!-- Bottom Editorial Quote -->
+            <div class="relative z-10 pt-4 border-t border-white/10">
+                <blockquote class="text-sm font-serif italic text-gray-300 leading-relaxed">
+                    &ldquo;Fashion is the armor to survive the reality of everyday life. Style is deeply personal, and AI brings it to life effortlessly.&rdquo;
+                </blockquote>
+                <div class="mt-2 flex items-center justify-between text-xs text-gray-400">
+                    <span>FitFusion AI Editorial</span>
+                    <span class="flex items-center gap-1 text-amber-400">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Clean Modern Login Form Card -->
+        <div class="w-full lg:w-1/2 bg-white p-8 sm:p-12 flex flex-col justify-center">
+            
+            <!-- Mobile Brand Mark -->
+            <div class="lg:hidden flex items-center gap-2 mb-6">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
+                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight text-gray-900">FitFusion<span class="text-rose-600">.ai</span></span>
+            </div>
+
+            <!-- Header Titles -->
+            <div class="mb-8">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+                    Welcome back
+                </h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    Sign in to access your personal AI wardrobe recommendations & style dashboard.
+                </p>
+            </div>
+
+            <!-- Flash / Status Messages -->
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                        <div class="flex items-start gap-3 p-3.5 rounded-xl text-sm transition-all duration-200 {% if message.tags == 'error' %}bg-rose-50 border border-rose-200 text-rose-800{% elif message.tags == 'success' %}bg-emerald-50 border border-emerald-200 text-emerald-800{% else %}bg-amber-50 border border-amber-200 text-amber-800{% endif %}">
+                            <i class="fa-solid {% if message.tags == 'error' %}fa-circle-exclamation text-rose-500{% elif message.tags == 'success' %}fa-circle-check text-emerald-500{% else %}fa-triangle-exclamation text-amber-500{% endif %} mt-0.5"></i>
+                            <div class="flex-1 font-medium">{{ message }}</div>
+                            <button type="button" onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Social Quick Sign-In Mockups -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button type="button" onclick="showDemoNotice('Google Sign-In')" class="flex items-center justify-center gap-2.5 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 transition duration-150 shadow-sm">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Google</span>
+                </button>
+                <button type="button" onclick="showDemoNotice('Apple Sign-In')" class="flex items-center justify-center gap-2.5 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 transition duration-150 shadow-sm">
+                    <i class="fa-brands fa-apple text-base text-gray-900"></i>
+                    <span>Apple</span>
                 </button>
             </div>
-            
-            <div class="text-center">
-                <a href="{% url 'register' %}" class="text-indigo-600 hover:text-indigo-500">
-                    Don't have an account? Register here
-                </a>
+
+            <!-- Divider -->
+            <div class="relative flex items-center justify-center mb-6">
+                <div class="border-t border-gray-200 w-full"></div>
+                <span class="bg-white px-3 text-xs uppercase tracking-wider text-gray-400 font-semibold absolute">
+                    or continue with
+                </span>
             </div>
-        </form>
+
+            <!-- Form -->
+            <form method="POST" action="{% url 'login' %}" class="space-y-5" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+                <!-- Username or Email Field -->
+                <div>
+                    <label for="id_username" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
+                        Username or Email
+                    </label>
+                    <div class="relative input-glow rounded-xl">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-regular fa-user text-sm"></i>
+                        </div>
+                        <input 
+                            id="id_username" 
+                            name="username" 
+                            type="text" 
+                            required 
+                            autofocus
+                            value="{{ form.username.value|default:'' }}"
+                            class="w-full pl-10 pr-4 py-3 bg-gray-50 border {% if form.username.errors %}border-rose-300 bg-rose-50/30{% else %}border-gray-200{% endif %} rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-rose-500 transition duration-150"
+                            placeholder="Enter your username or email">
+                    </div>
+                    {% if form.username.errors %}
+                        <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>{{ form.username.errors.0 }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="id_password" class="block text-xs font-bold uppercase tracking-wider text-gray-700">
+                            Password
+                        </label>
+                        <a href="#forgot" onclick="openForgotModal(event)" class="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline">
+                            Forgot password?
+                        </a>
+                    </div>
+                    <div class="relative input-glow rounded-xl">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-lock text-sm"></i>
+                        </div>
+                        <input 
+                            id="id_password" 
+                            name="password" 
+                            type="password" 
+                            required 
+                            class="w-full pl-10 pr-11 py-3 bg-gray-50 border {% if form.password.errors %}border-rose-300 bg-rose-50/30{% else %}border-gray-200{% endif %} rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-rose-500 transition duration-150"
+                            placeholder="Enter your password">
+                        <button 
+                            type="button" 
+                            onclick="togglePasswordVisibility('id_password', this)" 
+                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                            title="Toggle password view">
+                            <i class="fa-regular fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <p class="mt-1.5 text-xs text-rose-600 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>{{ form.password.errors.0 }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Remember Me & Policy -->
+                <div class="flex items-center justify-between pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input 
+                            type="checkbox" 
+                            name="remember_me" 
+                            id="id_remember_me"
+                            checked
+                            class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-gray-300">
+                        <span class="text-xs font-medium text-gray-600">Remember me on this device</span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button 
+                        type="submit" 
+                        class="btn-gradient w-full py-3.5 px-6 text-white text-sm font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">
+                        <span>Sign In to FitFusion</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Register Switch Footer -->
+                <div class="text-center pt-4 border-t border-gray-100">
+                    <p class="text-sm text-gray-600">
+                        Don&apos;t have an account yet? 
+                        <a href="{% url 'register' %}" class="font-bold text-rose-600 hover:text-rose-700 hover:underline">
+                            Create free account
+                        </a>
+                    </p>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
-{% endblock %}
+
+    <!-- Interactive Forgot Password Modal -->
+    <div id="forgotModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
+            <button onclick="closeForgotModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4 text-xl">
+                <i class="fa-solid fa-key"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900">Need Account Recovery?</h3>
+            <p class="text-sm text-gray-600 mt-2 leading-relaxed">
+                FitFusion accounts are managed securely. If you need your password reset, please contact your workspace administrator or register a new personal account.
+            </p>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="closeForgotModal()" class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script for Eye Toggle & Modals -->
+    <script>
+        function togglePasswordVisibility(fieldId, button) {
+            const field = document.getElementById(fieldId);
+            const icon = button.querySelector('i');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function openForgotModal(e) {
+            if (e) e.preventDefault();
+            document.getElementById('forgotModal').classList.remove('hidden');
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.add('hidden');
+        }
+
+        function showDemoNotice(provider) {
+            alert(provider + " integration is ready in development mode. Please sign in with your username or registered email below.");
+        }
+    </script>
+</body>
+</html>

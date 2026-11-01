@@ -203,28 +203,59 @@ def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
+            login_id = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
+            remember_me = form.cleaned_data.get('remember_me')
+            
+            # Support login with either username or email
+            user = authenticate(username=login_id, password=password)
+            if user is None and '@' in login_id:
+                user_match = CustomUser.objects.filter(email__iexact=login_id).first()
+                if user_match:
+                    user = authenticate(username=user_match.username, password=password)
+            
             if user is not None:
                 login(request, user)
+                if not remember_me:
+                    request.session.set_expiry(0)  # expires on browser close
+                else:
+                    request.session.set_expiry(1209600)  # 2 weeks
+                
+                messages.success(request, f"Welcome back, {user.username}!")
+                
+                next_page = request.GET.get('next') or request.POST.get('next')
+                if next_page:
+                    return redirect(next_page)
+                    
                 if user.is_owner:
                     return redirect('owner_dashboard')
                 return redirect('dashboard')
             else:
-                messages.error(request, 'Invalid username or password')
+                messages.error(request, 'Invalid username/email or password. Please try again.')
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
 
 
 def register(request):
+    if request.user.is_authenticated:
+        if request.user.is_owner:
+            return redirect('owner_dashboard')
+        return redirect('dashboard')
+
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
+            messages.success(request, f"Welcome to FitFusion, {user.username}! Your account has been successfully created.")
+            
+            next_page = request.GET.get('next') or request.POST.get('next')
+            if next_page:
+                return redirect(next_page)
             return redirect('dashboard')
+        else:
+            messages.error(request, 'Please correct the errors in the form below.')
     else:
         form = CustomUserCreationForm()
     return render(request, 'register.html', {'form': form})
@@ -431,16 +462,31 @@ FEATURE_LIST_PATH = os.path.join(settings.BASE_DIR, 'featurevector.pkl')
 FILENAMES_PATH = os.path.join(settings.BASE_DIR, 'filenames.pkl')
 
 # Load precomputed features and filenames
-feature_list = np.array(pickle.load(open(FEATURE_LIST_PATH, 'rb')))
-filenames = pickle.load(open(FILENAMES_PATH, 'rb'))
+try:
+    feature_list = np.array(pickle.load(open(FEATURE_LIST_PATH, 'rb')))
+    filenames = pickle.load(open(FILENAMES_PATH, 'rb'))
+except Exception as e:
+    print(f"Notice: Could not pre-load feature files: {e}")
+    feature_list = []
+    filenames = []
 
-# Load ResNet50 model
-model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-model.trainable = False
-model = tensorflow.keras.Sequential([
-    model,
-    GlobalMaxPooling2D()
-])
+# ResNet50 model (lazy-loaded to prevent startup/offline crashes)
+_resnet_model = None
+
+def get_resnet_model():
+    global _resnet_model
+    if _resnet_model is None:
+        try:
+            base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+            base_model.trainable = False
+            _resnet_model = tensorflow.keras.Sequential([
+                base_model,
+                GlobalMaxPooling2D()
+            ])
+        except Exception as e:
+            print(f"Notice: ResNet50 weights load error: {e}")
+            return None
+    return _resnet_model
 
 def serve_image(image_path):
     try:
@@ -480,7 +526,11 @@ def fashion_recommend(request):
             filename = fs.save(f'uploads/{uploaded_file.name}', uploaded_file)
             uploaded_file_path = fs.path(filename)
             
-            features = extract_feature(uploaded_file_path, model)
+            model_instance = get_resnet_model()
+            if model_instance is None:
+                messages.error(request, 'Model is currently unavailable. Please try again later.')
+                return render(request, 'fashion/upload.html')
+            features = extract_feature(uploaded_file_path, model_instance)
             indices = recommend(features, feature_list)
             
             recommended_images = []

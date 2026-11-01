@@ -1,123 +1,554 @@
-{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Free Account &bull; FitFusion AI Stylist</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fdf4f7',
+                            100: '#fbe8ef',
+                            500: '#e11d48',
+                            600: '#be123c',
+                            900: '#4c0519',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
-{% block title %}Register - Code Review Buddy{% endblock %}
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+            color: #0f172a;
+        }
 
-{% block content %}
-<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Create your account
-            </h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
-                Already have an account?
-                <a href="{% url 'login' %}" class="font-medium text-indigo-600 hover:text-indigo-500">
-                    Sign in
-                </a>
-            </p>
-        </div>
+        .ambient-mesh {
+            background: radial-gradient(circle at 85% 20%, rgba(99, 102, 241, 0.25) 0%, transparent 40%),
+                        radial-gradient(circle at 15% 75%, rgba(225, 29, 72, 0.22) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 55%),
+                        #0b0f19;
+        }
 
-        <form class="mt-8 space-y-6" method="POST">
-            {% csrf_token %}
-            
-            {% if form.errors %}
-                <div class="rounded-md bg-red-50 p-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-red-800">
-                                Please correct the following errors:
-                            </h3>
-                            <div class="mt-2 text-sm text-red-700">
-                                <ul class="list-disc pl-5 space-y-1">
-                                    {% for field in form %}
-                                        {% if field.errors %}
-                                            {% for error in field.errors %}
-                                                <li>{{ field.label }}: {{ error }}</li>
-                                            {% endfor %}
-                                        {% endif %}
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
+        .dark-glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #e11d48 0%, #9333ea 50%, #4f46e5 100%);
+            background-size: 200% auto;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-gradient:hover {
+            background-position: right center;
+            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .input-glow:focus-within {
+            box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15), 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen ambient-mesh flex items-center justify-center p-4 sm:p-6 lg:p-8">
+
+    <!-- Back to Home Floating Pill -->
+    <a href="{% url 'home' %}" class="fixed top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 text-xs font-semibold tracking-wider text-gray-300 uppercase bg-slate-900/80 hover:bg-slate-800 backdrop-blur-md border border-white/10 rounded-full transition-all duration-300 hover:text-white hover:border-white/30 shadow-lg">
+        <i class="fa-solid fa-arrow-left text-[10px]"></i>
+        <span>Back to Home</span>
+    </a>
+
+    <!-- Main Auth Shell -->
+    <div class="w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row my-auto border border-white/10 bg-slate-900/40 backdrop-blur-2xl">
+        
+        <!-- Left Side: Editorial & Fashion AI Showcase -->
+        <div class="hidden lg:flex lg:w-1/2 relative p-12 flex-col justify-between overflow-hidden bg-gradient-to-br from-slate-900 via-purple-950/40 to-slate-950">
+            <!-- Background Radial Glows -->
+            <div class="absolute -top-24 -left-24 w-80 h-80 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Top Header on Showcase -->
+            <div class="relative z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-rose-500/30">
+                        <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
                     </div>
+                    <span class="text-2xl font-bold tracking-tight text-white">FitFusion<span class="text-rose-500">.ai</span></span>
                 </div>
-            {% endif %}
-
-            <div class="rounded-md shadow-sm -space-y-px">
-                <div>
-                    <label for="username" class="sr-only">Username</label>
-                    <input id="username" name="username" type="text" required
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Username"
-                           value="{{ form.username.value|default:'' }}">
-                </div>
-                <div>
-                    <label for="email" class="sr-only">Email address</label>
-                    <input id="email" name="email" type="email" required
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Email address"
-                           value="{{ form.email.value|default:'' }}">
-                </div>
-                <div>
-                    <label for="password1" class="sr-only">Password</label>
-                    <input id="password1" name="password1" type="password" required
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Password">
-                </div>
-                <div>
-                    <label for="password2" class="sr-only">Confirm Password</label>
-                    <input id="password2" name="password2" type="password" required
-                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                           placeholder="Confirm Password">
+                <div class="inline-flex items-center gap-2 mt-4 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-rose-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    Instant Free Membership &bull; No Credit Card Required
                 </div>
             </div>
 
-            {% if form.non_field_errors %}
-                <div class="rounded-md bg-red-50 p-4 mt-4">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <div class="text-sm text-red-700">
-                                {{ form.non_field_errors }}
-                            </div>
-                        </div>
+            <!-- Central Visual: Key Perks of FitFusion Membership -->
+            <div class="relative z-10 my-8 space-y-4">
+                <div class="dark-glass-card rounded-2xl p-5 border border-white/10 shadow-xl flex items-start gap-4 animate-float">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 text-base">
+                        <i class="fa-solid fa-sparkles"></i>
                     </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-white">Smart AI Recommendations</h4>
+                        <p class="text-xs text-gray-300 mt-1 leading-relaxed">
+                            Upload photos or describe your occasion to receive tailored outfit formulas crafted by deep learning.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="dark-glass-card rounded-2xl p-5 border border-white/10 shadow-xl flex items-start gap-4" style="animation: floatSlow 7s ease-in-out infinite;">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0 text-base">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-white">Visual Piece Inspo</h4>
+                        <p class="text-xs text-gray-300 mt-1 leading-relaxed">
+                            Discover visually similar garments, complementary layering, and matching accessories across 10,000+ items.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="dark-glass-card rounded-2xl p-5 border border-white/10 shadow-xl flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 text-base">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-white">Personal Style Privacy</h4>
+                        <p class="text-xs text-gray-300 mt-1 leading-relaxed">
+                            Your wardrobe, uploaded photos, and size profiles remain 100% private and protected.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Testimonial -->
+            <div class="relative z-10 pt-4 border-t border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-rose-400 flex items-center justify-center text-white text-xs font-bold border border-white/20">
+                        SC
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-white">Sophie Chen &bull; Fashion Influencer</p>
+                        <p class="text-[11px] text-gray-400">&ldquo;FitFusion completely eliminated my daily &apos;what do I wear&apos; stress!&rdquo;</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Clean Modern Registration Form -->
+        <div class="w-full lg:w-1/2 bg-white p-8 sm:p-12 flex flex-col justify-center">
+            
+            <!-- Mobile Brand Mark -->
+            <div class="lg:hidden flex items-center gap-2 mb-6">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
+                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight text-gray-900">FitFusion<span class="text-rose-600">.ai</span></span>
+            </div>
+
+            <!-- Header Titles -->
+            <div class="mb-6">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+                    Create your account
+                </h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    Join FitFusion today to unlock personalized AI outfit recommendations.
+                </p>
+            </div>
+
+            <!-- Django Flash Messages -->
+            {% if messages %}
+                <div class="mb-5 space-y-2">
+                    {% for message in messages %}
+                        <div class="flex items-start gap-3 p-3.5 rounded-xl text-sm transition-all duration-200 {% if message.tags == 'error' %}bg-rose-50 border border-rose-200 text-rose-800{% elif message.tags == 'success' %}bg-emerald-50 border border-emerald-200 text-emerald-800{% else %}bg-amber-50 border border-amber-200 text-amber-800{% endif %}">
+                            <i class="fa-solid {% if message.tags == 'error' %}fa-circle-exclamation text-rose-500{% elif message.tags == 'success' %}fa-circle-check text-emerald-500{% else %}fa-triangle-exclamation text-amber-500{% endif %} mt-0.5"></i>
+                            <div class="flex-1 font-medium">{{ message }}</div>
+                            <button type="button" onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
                 </div>
             {% endif %}
 
-            <div>
-                <button type="submit"
-                        class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <svg class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                        </svg>
-                    </span>
-                    Register
+            <!-- Social Quick Sign-Up Mockups -->
+            <div class="grid grid-cols-2 gap-3 mb-5">
+                <button type="button" onclick="showDemoNotice('Google Sign-Up')" class="flex items-center justify-center gap-2.5 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 transition duration-150 shadow-sm">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Google</span>
+                </button>
+                <button type="button" onclick="showDemoNotice('Apple Sign-Up')" class="flex items-center justify-center gap-2.5 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 transition duration-150 shadow-sm">
+                    <i class="fa-brands fa-apple text-base text-gray-900"></i>
+                    <span>Apple</span>
                 </button>
             </div>
-        </form>
 
-        <!-- Password Requirements -->
-        <div class="mt-4 text-sm text-gray-600">
-            <h4 class="font-medium mb-2">Password requirements:</h4>
-            <ul class="list-disc pl-5 space-y-1">
-                <li>At least 8 characters long</li>
-                <li>Must contain at least one number</li>
-                <li>Must contain at least one letter</li>
-                <li>Cannot be entirely numeric</li>
-                <li>Cannot be too similar to your username</li>
-            </ul>
+            <!-- Divider -->
+            <div class="relative flex items-center justify-center mb-5">
+                <div class="border-t border-gray-200 w-full"></div>
+                <span class="bg-white px-3 text-xs uppercase tracking-wider text-gray-400 font-semibold absolute">
+                    or register with email
+                </span>
+            </div>
+
+            <!-- Registration Form -->
+            <form method="POST" action="{% url 'register' %}" class="space-y-4" id="registerForm" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+                <!-- Non-Field Errors -->
+                {% if form.non_field_errors %}
+                    <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <!-- Username Field -->
+                <div>
+                    <label for="id_username" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                        Username
+                    </label>
+                    <div class="relative input-glow rounded-xl">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-regular fa-user text-sm"></i>
+                        </div>
+                        <input 
+                            id="id_username" 
+                            name="username" 
+                            type="text" 
+                            required 
+                            autofocus
+                            value="{{ form.username.value|default:'' }}"
+                            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border {% if form.username.errors %}border-rose-300 bg-rose-50/30{% else %}border-gray-200{% endif %} rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-rose-500 transition duration-150"
+                            placeholder="e.g. stylequeen or alex24">
+                    </div>
+                    {% if form.username.errors %}
+                        <p class="mt-1 text-xs text-rose-600 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>{{ form.username.errors.0 }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Email Field -->
+                <div>
+                    <label for="id_email" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                        Email Address
+                    </label>
+                    <div class="relative input-glow rounded-xl">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-regular fa-envelope text-sm"></i>
+                        </div>
+                        <input 
+                            id="id_email" 
+                            name="email" 
+                            type="email" 
+                            required 
+                            value="{{ form.email.value|default:'' }}"
+                            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border {% if form.email.errors %}border-rose-300 bg-rose-50/30{% else %}border-gray-200{% endif %} rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-rose-500 transition duration-150"
+                            placeholder="name@example.com">
+                    </div>
+                    {% if form.email.errors %}
+                        <p class="mt-1 text-xs text-rose-600 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>{{ form.email.errors.0 }}</span>
+                        </p>
+                    {% endif %}
+                </div>
+
+                <!-- Password 1 Field -->
+                <div>
+                    <label for="id_password1" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                        Password
+                    </label>
+                    <div class="relative input-glow rounded-xl">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-lock text-sm"></i>
+                        </div>
+                        <input 
+                            id="id_password1" 
+                            name="password1" 
+                            type="password" 
+                            required 
+                            oninput="checkPasswordStrength(this.value)"
+                            class="w-full pl-10 pr-11 py-2.5 bg-gray-50 border {% if form.password1.errors %}border-rose-300 bg-rose-50/30{% else %}border-gray-200{% endif %} rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-rose-500 transition duration-150"
+                            placeholder="At least 8 characters">
+                        <button 
+                            type="button" 
+                            onclick="togglePasswordVisibility('id_password1', this)" 
+                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                            title="Toggle password view">
+                            <i class="fa-regular fa-eye text-sm"></i>
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Password Strength Bar -->
+                    <div class="mt-2 space-y-1">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-gray-500">Security:</span>
+                            <span id="strengthText" class="font-bold text-gray-400">Too Short</span>
+                        </div>
+                        <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                            <div id="strengthBar" class="h-full bg-gray-300 transition-all duration-300 w-1/12"></div>
+                        </div>
+                    </div>
+
+                    {% if form.password1.errors %}
+                        <div class="mt-1.5 space-y-1">
+                            {% for error in form.password1.errors %}
+                                <p class="text-xs text-rose-600 flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                    <span>{{ error }}</span>
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Password 2 Field (Confirm) -->
+                <div>
+                    <label for="id_password2" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                        Confirm Password
+                    </label>
+                    <div class="relative input-glow rounded-xl">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-shield-halved text-sm"></i>
+                        </div>
+                        <input 
+                            id="id_password2" 
+                            name="password2" 
+                            type="password" 
+                            required 
+                            oninput="checkPasswordMatch()"
+                            class="w-full pl-10 pr-11 py-2.5 bg-gray-50 border {% if form.password2.errors %}border-rose-300 bg-rose-50/30{% else %}border-gray-200{% endif %} rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-rose-500 transition duration-150"
+                            placeholder="Re-enter your password">
+                        <button 
+                            type="button" 
+                            onclick="togglePasswordVisibility('id_password2', this)" 
+                            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                            title="Toggle password view">
+                            <i class="fa-regular fa-eye text-sm"></i>
+                        </button>
+                    </div>
+                    <div id="matchIndicator" class="mt-1 text-xs hidden flex items-center gap-1 font-medium"></div>
+
+                    {% if form.password2.errors %}
+                        <div class="mt-1.5 space-y-1">
+                            {% for error in form.password2.errors %}
+                                <p class="text-xs text-rose-600 flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                    <span>{{ error }}</span>
+                                </p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Terms and Policy Checkbox -->
+                <div class="pt-1">
+                    <label class="flex items-start gap-2.5 cursor-pointer select-none">
+                        <input 
+                            type="checkbox" 
+                            required 
+                            checked
+                            name="terms" 
+                            class="w-4 h-4 mt-0.5 rounded text-rose-600 focus:ring-rose-500 border-gray-300">
+                        <span class="text-xs text-gray-600 leading-tight">
+                            I agree to the 
+                            <a href="#terms" onclick="openTermsModal(event)" class="text-rose-600 font-semibold hover:underline">Terms of Service</a>
+                            and 
+                            <a href="#privacy" onclick="openPrivacyModal(event)" class="text-rose-600 font-semibold hover:underline">Privacy Policy</a>.
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button 
+                        type="submit" 
+                        class="btn-gradient w-full py-3.5 px-6 text-white text-sm font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">
+                        <span>Create Account</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Login Switch Footer -->
+                <div class="text-center pt-3 border-t border-gray-100">
+                    <p class="text-sm text-gray-600">
+                        Already have an account? 
+                        <a href="{% url 'login' %}" class="font-bold text-rose-600 hover:text-rose-700 hover:underline">
+                            Sign in here
+                        </a>
+                    </p>
+                </div>
+            </form>
         </div>
     </div>
-</div>
-{% endblock %}
+
+    <!-- Terms Modal -->
+    <div id="termsModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal('termsModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-lg font-bold text-gray-900 mb-3">FitFusion Terms of Service</h3>
+            <div class="text-xs text-gray-600 space-y-3 leading-relaxed">
+                <p>Welcome to FitFusion. By creating an account, you agree to access our personalized fashion recommendations and image similarity search tools responsibly.</p>
+                <p>1. <strong>Account Responsibility:</strong> You are responsible for safeguarding your login credentials.</p>
+                <p>2. <strong>AI Advice Disclaimer:</strong> Our fashion suggestions are powered by state-of-the-art machine learning models to provide outfit inspiration. They are provided for personal styling purposes.</p>
+                <p>3. <strong>Fair Usage:</strong> Free member tiers are granted generous monthly queries to explore and curate outfits.</p>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button type="button" onclick="closeModal('termsModal')" class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl">
+                    Understood
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div id="privacyModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal('privacyModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-lg font-bold text-gray-900 mb-3">Privacy & Data Security</h3>
+            <div class="text-xs text-gray-600 space-y-3 leading-relaxed">
+                <p>Your privacy is our priority. We only collect the minimal information needed to personalize your fashion recommendations:</p>
+                <p>&bull; <strong>Account Data:</strong> We never sell your personal information or email to third parties.</p>
+                <p>&bull; <strong>Photo Uploads:</strong> Images uploaded for piece inspo are processed securely and used solely for generating visual similarity matches.</p>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button type="button" onclick="closeModal('privacyModal')" class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl">
+                    Got it
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        function togglePasswordVisibility(fieldId, button) {
+            const field = document.getElementById(fieldId);
+            const icon = button.querySelector('i');
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function checkPasswordStrength(password) {
+            const bar = document.getElementById('strengthBar');
+            const label = document.getElementById('strengthText');
+            
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+
+            if (!password || password.length < 6) {
+                bar.style.width = '15%';
+                bar.className = 'h-full bg-rose-500 transition-all duration-300';
+                label.innerText = 'Too Short';
+                label.className = 'font-bold text-rose-500';
+            } else if (score <= 1) {
+                bar.style.width = '35%';
+                bar.className = 'h-full bg-orange-500 transition-all duration-300';
+                label.innerText = 'Weak';
+                label.className = 'font-bold text-orange-500';
+            } else if (score === 2) {
+                bar.style.width = '65%';
+                bar.className = 'h-full bg-amber-500 transition-all duration-300';
+                label.innerText = 'Moderate';
+                label.className = 'font-bold text-amber-500';
+            } else {
+                bar.style.width = '100%';
+                bar.className = 'h-full bg-emerald-500 transition-all duration-300';
+                label.innerText = 'Strong';
+                label.className = 'font-bold text-emerald-500';
+            }
+
+            checkPasswordMatch();
+        }
+
+        function checkPasswordMatch() {
+            const p1 = document.getElementById('id_password1').value;
+            const p2 = document.getElementById('id_password2').value;
+            const indicator = document.getElementById('matchIndicator');
+
+            if (!p2) {
+                indicator.className = 'hidden';
+                return;
+            }
+
+            indicator.classList.remove('hidden');
+            if (p1 === p2) {
+                indicator.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-500"></i><span class="text-emerald-600">Passwords match perfectly</span>';
+            } else {
+                indicator.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-500"></i><span class="text-rose-600">Passwords do not match yet</span>';
+            }
+        }
+
+        function openTermsModal(e) {
+            if (e) e.preventDefault();
+            document.getElementById('termsModal').classList.remove('hidden');
+        }
+
+        function openPrivacyModal(e) {
+            if (e) e.preventDefault();
+            document.getElementById('privacyModal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function showDemoNotice(provider) {
+            alert(provider + " integration is ready in development mode. Please sign up using the direct registration form.");
+        }
+    </script>
+</body>
+</html>
