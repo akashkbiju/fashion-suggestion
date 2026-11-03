@@ -1,34 +1,203 @@
-<!-- templates/fashion/results.html -->
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Style Match Results &bull; FitFusion AI{% endblock %}
+
+{% block extra_css %}
+<!-- Google Fonts & Tailwind -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    serif: ['"Playfair Display"', 'serif'],
+                },
+                colors: {
+                    brand: {
+                        50: '#fdf4f7',
+                        100: '#fbe8ef',
+                        500: '#e11d48',
+                        600: '#be123c',
+                    }
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .studio-gradient {
+        background: radial-gradient(circle at 10% 10%, rgba(225, 29, 72, 0.08) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                    #ffffff;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #e11d48 0%, #9333ea 50%, #4f46e5 100%);
+        background-size: 200% auto;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-gradient:hover {
+        background-position: right center;
+        box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .card-zoom:hover img {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block hero_section %}
+<!-- Header Banner -->
+<div class="relative overflow-hidden bg-slate-900 py-10 px-4 sm:px-6 lg:px-8 border-b border-white/10">
+    <div class="absolute -top-24 -left-24 w-80 h-80 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-400 mb-2">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Analysis Complete &bull; Top 6 Matches Found</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+                AI Curated Fashion Matches
+            </h1>
+            <p class="text-xs sm:text-sm text-gray-300 mt-1">
+                Visual similarity matches computed using ResNet50 deep features and nearest neighbor clustering.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="{% url 'fashion_recommend' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-gray-900 hover:bg-gray-100 text-xs font-bold transition shadow-sm">
+                <i class="fa-solid fa-cloud-arrow-up text-rose-600"></i>
+                <span>Upload Another</span>
+            </a>
+            <a href="{% url 'file_review' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-bold transition">
+                <i class="fa-solid fa-comments"></i>
+                <span>Chat Stylist</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Fashion Recommendations</h1>
-    
-    <div class="row justify-content-center mb-4">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Uploaded Image</h5>
+<div class="min-h-screen studio-gradient py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto space-y-12">
+
+        <!-- Split View: Uploaded Item & Match Overview -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <!-- Left: Uploaded Piece Spotlight -->
+            <div class="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 lg:sticky lg:top-24 space-y-5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-600 flex items-center gap-1.5">
+                        <i class="fa-solid fa-sparkles"></i> Reference Piece
+                    </span>
+                    <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                        Query Anchor
+                    </span>
                 </div>
-                <img src="{{ uploaded_image }}" class="card-img-top" alt="Uploaded Fashion Item">
+
+                <div class="aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-gray-100 shadow-inner group">
+                    <img 
+                        src="{{ uploaded_image }}" 
+                        alt="Your uploaded fashion item" 
+                        class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
+                </div>
+
+                <div class="p-4 rounded-2xl bg-slate-50 space-y-2 border border-slate-100">
+                    <h4 class="text-sm font-bold text-gray-900">Neural Signature Extracted</h4>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        Vectorized across color distribution, texture motifs, fabric density, and silhouette boundaries.
+                    </p>
+                </div>
+
+                <a href="{% url 'fashion_recommend' %}" class="w-full py-3 px-4 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs font-bold text-center block transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Try a Different Image
+                </a>
+            </div>
+
+            <!-- Right: Recommended Similar Items (Top 6) -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-gray-900">
+                            Nearest Neighbor Matches
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-0.5">
+                            Ranked by cosine feature proximity from our curated catalog
+                        </p>
+                    </div>
+                    <span class="text-xs font-semibold px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-100">
+                        {{ recommended_images|length }} Matches
+                    </span>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                    {% for image in recommended_images %}
+                        <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group card-zoom flex flex-col justify-between">
+                            <div class="relative aspect-square overflow-hidden bg-slate-50">
+                                <img 
+                                    src="{% url 'serve_fashion_image' image %}" 
+                                    alt="Fashion recommendation piece" 
+                                    class="w-full h-full object-cover transition duration-500">
+                                
+                                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/70 backdrop-blur-md text-white border border-white/20">
+                                    Match #{{ forloop.counter }}
+                                </span>
+                            </div>
+
+                            <div class="p-4 flex items-center justify-between border-t border-gray-50">
+                                <div class="truncate">
+                                    <p class="text-xs font-bold text-gray-900 truncate">Curated Piece #{{ forloop.counter }}</p>
+                                    <p class="text-[11px] text-gray-400">High visual correlation</p>
+                                </div>
+                                <span class="w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center text-xs group-hover:bg-rose-600 group-hover:text-white transition">
+                                    <i class="fa-solid fa-heart"></i>
+                                </span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-span-3 text-center py-16 bg-white rounded-3xl border border-gray-100 p-8">
+                            <i class="fa-solid fa-circle-exclamation text-4xl text-gray-300 mb-3"></i>
+                            <h3 class="text-base font-bold text-gray-700">No Similar Items Found</h3>
+                            <p class="text-xs text-gray-500 mt-1">Try uploading another piece with higher lighting or a different angle.</p>
+                            <a href="{% url 'fashion_recommend' %}" class="mt-4 inline-block px-5 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">
+                                Upload Again
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Next Actions Callout -->
+                <div class="bg-gradient-to-r from-purple-900 to-indigo-900 rounded-3xl p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+                    <div class="space-y-1 text-center sm:text-left">
+                        <h4 class="text-sm font-bold text-white flex items-center gap-2 justify-center sm:justify-start">
+                            <i class="fa-solid fa-wand-magic-sparkles text-rose-400"></i>
+                            <span>Want Complete Outfit Ideas?</span>
+                        </h4>
+                        <p class="text-xs text-purple-200">
+                            Ask our AI Stylist to generate full top-to-bottom outfit combinations for any event.
+                        </p>
+                    </div>
+                    <a href="{% url 'file_review' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-indigo-950 font-bold text-xs hover:bg-gray-100 transition whitespace-nowrap shadow-sm">
+                        <span>Launch Outfit Stylist</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+
             </div>
         </div>
-    </div>
-    
-    <h2 class="text-center mb-4">Similar Items</h2>
-    <div class="row">
-        {% for image in recommended_images %}
-        <div class="col-md-2 mb-3">
-            <div class="card">
-                <img src="{% url 'serve_fashion_image' image %}" class="card-img-top" alt="Recommended Fashion Item">
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    
-    <div class="text-center mt-4">
-        <a href="{% url 'fashion_recommend' %}" class="btn btn-primary">Try Another Image</a>
+
     </div>
 </div>
 {% endblock %}

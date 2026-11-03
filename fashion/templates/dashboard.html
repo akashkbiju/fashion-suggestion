@@ -1,24 +1,151 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard &bull; FitFusion AI Stylist{% endblock %}
+
+{% block extra_css %}
+<!-- Google Fonts & Tailwind -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    serif: ['"Playfair Display"', 'serif'],
+                },
+                colors: {
+                    brand: {
+                        50: '#fdf4f7',
+                        100: '#fbe8ef',
+                        500: '#e11d48',
+                        600: '#be123c',
+                    }
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .studio-gradient {
+        background: radial-gradient(circle at 10% 10%, rgba(225, 29, 72, 0.08) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                    #ffffff;
+    }
+    .btn-gradient {
+        background: linear-gradient(135deg, #e11d48 0%, #9333ea 50%, #4f46e5 100%);
+        background-size: 200% auto;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-gradient:hover {
+        background-position: right center;
+        box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block hero_section %}
+<!-- Dashboard Welcome Banner -->
+<div class="relative overflow-hidden bg-slate-900 py-12 px-4 sm:px-6 lg:px-8 border-b border-white/10">
+    <div class="absolute -top-24 -left-24 w-80 h-80 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-rose-300 mb-2 backdrop-blur-md">
+                <i class="fa-solid fa-sparkles text-rose-400"></i>
+                <span>Member Style Hub</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Welcome back, {{ request.user.username|capfirst }}
+            </h1>
+            <p class="text-xs sm:text-sm text-gray-300 mt-1">
+                Select an AI styling tool below to explore outfit combinations or find matching garments.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-xs font-semibold text-gray-300 border border-white/10">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Limit: {{ request.user.query_limit }} queries/mo</span>
+            </span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="grid grid-cols-1 md:grid-cols-3  gap-6" style="
-    align-content: center;
-    justify-content: center;
-    display: flex;
-">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Outfit Recommendation</h2>
-            <p class="text-gray-600 mb-4">Chat with the Fitfusion AI for recs</p>
-            <a href="{% url 'file_review' %}" class="btn bg-blue-500 text-white px-4 py-2 rounded">Start</a>
+<div class="min-h-screen studio-gradient py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto space-y-10">
+
+        <!-- Tool Selection Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Card 1: Piece Inspo & Visual Matching -->
+            <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 flex flex-col justify-between hover:shadow-2xl transition duration-300 group">
+                <div class="space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl group-hover:scale-110 transition duration-300">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-rose-600">Computer Vision &bull; ResNet50</span>
+                        <h2 class="text-2xl font-extrabold text-gray-900 mt-1">Cloth Piece Recommendation</h2>
+                    </div>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        Upload photos of your favorite clothing pieces to instantly discover visually similar apparel, complementary textures, and matching silhouettes.
+                    </p>
+
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <span class="px-3 py-1 rounded-full bg-slate-50 border border-gray-100 text-xs font-medium text-gray-600">Drag &amp; Drop</span>
+                        <span class="px-3 py-1 rounded-full bg-slate-50 border border-gray-100 text-xs font-medium text-gray-600">10k+ Catalog</span>
+                        <span class="px-3 py-1 rounded-full bg-slate-50 border border-gray-100 text-xs font-medium text-gray-600">Top-6 Matches</span>
+                    </div>
+                </div>
+
+                <div class="pt-8">
+                    <a href="{% url 'fashion_recommend' %}" class="btn-gradient w-full py-3.5 px-6 text-white text-sm font-bold rounded-2xl shadow-lg flex items-center justify-center gap-2 group-hover:shadow-rose-500/25">
+                        <span>Launch Piece Inspo</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card 2: AI Outfit Stylist Chat -->
+            <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 flex flex-col justify-between hover:shadow-2xl transition duration-300 group">
+                <div class="space-y-4">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl group-hover:scale-110 transition duration-300">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Generative AI &bull; Gemini &amp; Groq</span>
+                        <h2 class="text-2xl font-extrabold text-gray-900 mt-1">Outfit Recommendation Stylist</h2>
+                    </div>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        Chat with the FitFusion AI assistant. Describe your event, personal aesthetics, or weather to generate curated top-to-bottom outfit formulas.
+                    </p>
+
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <span class="px-3 py-1 rounded-full bg-slate-50 border border-gray-100 text-xs font-medium text-gray-600">Interactive Chat</span>
+                        <span class="px-3 py-1 rounded-full bg-slate-50 border border-gray-100 text-xs font-medium text-gray-600">Occasion Formulas</span>
+                        <span class="px-3 py-1 rounded-full bg-slate-50 border border-gray-100 text-xs font-medium text-gray-600">Layering &amp; Accessories</span>
+                    </div>
+                </div>
+
+                <div class="pt-8">
+                    <a href="{% url 'file_review' %}" class="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-2xl shadow-lg flex items-center justify-center gap-2 transition">
+                        <span>Start Chat Stylist</span>
+                        <i class="fa-solid fa-comments text-xs"></i>
+                    </a>
+                </div>
+            </div>
+
         </div>
-        
-        
-        
-        <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold mb-4">Cloth piece Recommendation</h2>
-            <p class="text-gray-600 mb-4">Give your Fav apparels to get similiar ones </p>
-            <a href="{% url 'fashion_recommend' %}" class="btn bg-purple-500 text-white px-4 py-2 rounded">Go</a>
-        </div>
+
     </div>
 </div>
 {% endblock %}

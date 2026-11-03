@@ -1,25 +1,443 @@
-<!-- templates/fashion/upload.html -->
 {% extends 'base.html' %}
+{% load static %}
 
-{% block content %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Fashion Recommendation System</h1>
-    
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="image" class="form-label">Choose an image</label>
-                            <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Upload and Get Recommendations</button>
-                    </form>
-                </div>
-            </div>
+{% block title %}Piece Inspo & Visual Matching &bull; FitFusion AI{% endblock %}
+
+{% block extra_css %}
+<!-- Google Fonts & Tailwind -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    serif: ['"Playfair Display"', 'serif'],
+                },
+                colors: {
+                    brand: {
+                        50: '#fdf4f7',
+                        100: '#fbe8ef',
+                        500: '#e11d48',
+                        600: '#be123c',
+                    }
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .studio-gradient {
+        background: radial-gradient(circle at 10% 10%, rgba(225, 29, 72, 0.08) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                    #ffffff;
+    }
+
+    .dropzone-border {
+        background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='24' ry='24' stroke='%23CBD5E1' stroke-width='2' stroke-dasharray='10%2c 10' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e");
+        transition: all 0.3s ease;
+    }
+
+    .dropzone-border.dragover {
+        background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='24' ry='24' stroke='%23E11D48' stroke-width='3' stroke-dasharray='12%2c 8' stroke-dashoffset='4' stroke-linecap='round'/%3e%3c/svg%3e");
+        background-color: rgba(225, 29, 72, 0.03);
+        transform: scale(1.008);
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #e11d48 0%, #9333ea 50%, #4f46e5 100%);
+        background-size: 200% auto;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-gradient:hover:not(:disabled) {
+        background-position: right center;
+        box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4);
+        transform: translateY(-2px);
+    }
+
+    @keyframes pulseGlow {
+        0%, 100% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.05); }
+    }
+    .pulse-glow {
+        animation: pulseGlow 3s ease-in-out infinite;
+    }
+</style>
+{% endblock %}
+
+{% block hero_section %}
+<!-- Compact Modern Inner Header -->
+<div class="relative overflow-hidden bg-slate-900 py-12 px-4 sm:px-6 lg:px-8 border-b border-white/10">
+    <!-- Ambient Glows -->
+    <div class="absolute -top-24 -left-24 w-80 h-80 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative max-w-5xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-semibold text-rose-300 mb-4 backdrop-blur-md">
+            <i class="fa-solid fa-wand-magic-sparkles text-rose-400"></i>
+            <span>ResNet50 Deep Feature Extraction</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
+            Visual Piece Inspo &amp; Matching
+        </h1>
+        <p class="mt-3 text-sm sm:text-base text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            Upload any apparel photo, outfit snapshot, or accessory. Our neural vision model analyzes style vectors, silhouette, and textures to find matching pieces instantly.
+        </p>
+
+        <!-- Quick Spec Pills -->
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-300">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-white/5">
+                <i class="fa-solid fa-bolt text-amber-400"></i> Instant Similarity Matching
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-white/5">
+                <i class="fa-solid fa-layer-group text-purple-400"></i> 2048-D Vector Embeddings
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 border border-white/5">
+                <i class="fa-solid fa-shield-halved text-emerald-400"></i> Private &amp; Secure
+            </span>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen studio-gradient py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto space-y-10">
+
+        <!-- Flash Messages -->
+        {% if messages %}
+            <div class="space-y-3">
+                {% for message in messages %}
+                    <div class="flex items-start gap-3 p-4 rounded-2xl text-sm {% if message.tags == 'error' %}bg-rose-50 border border-rose-200 text-rose-800{% elif message.tags == 'success' %}bg-emerald-50 border border-emerald-200 text-emerald-800{% else %}bg-amber-50 border border-amber-200 text-amber-800{% endif %} shadow-sm">
+                        <i class="fa-solid {% if message.tags == 'error' %}fa-circle-exclamation text-rose-500{% elif message.tags == 'success' %}fa-circle-check text-emerald-500{% else %}fa-triangle-exclamation text-amber-500{% endif %} mt-0.5 text-base"></i>
+                        <div class="flex-1 font-medium">{{ message }}</div>
+                        <button type="button" onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Main Upload Card -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-10 relative overflow-hidden">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-gray-100 gap-4">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-camera"></i>
+                        </span>
+                        <span>Upload Your Fashion Piece</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                        Select a clear image of a top, bottoms, shoes, dress, jacket, or handbag.
+                    </p>
+                </div>
+
+                <!-- Monthly Query Indicator -->
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gray-50 border border-gray-200 text-xs font-semibold text-gray-700 self-start sm:self-auto">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>AI Engine Ready</span>
+                </div>
+            </div>
+
+            <!-- Upload Form -->
+            <form method="POST" enctype="multipart/form-data" id="uploadForm" class="mt-8 space-y-6">
+                {% csrf_token %}
+
+                <!-- Hidden Real File Input -->
+                <input 
+                    type="file" 
+                    id="imageInput" 
+                    name="image" 
+                    accept="image/png, image/jpeg, image/jpg, image/webp" 
+                    required 
+                    class="hidden"
+                    onchange="handleFileSelect(this.files)">
+
+                <!-- Interactive Drag and Drop Zone -->
+                <div 
+                    id="dropZone" 
+                    onclick="document.getElementById('imageInput').click()" 
+                    ondragover="handleDragOver(event)" 
+                    ondragleave="handleDragLeave(event)" 
+                    ondrop="handleDrop(event)"
+                    class="dropzone-border rounded-3xl p-8 sm:p-12 text-center cursor-pointer bg-slate-50/50 hover:bg-slate-50 transition-all duration-300 relative group">
+                    
+                    <!-- Pre-Upload Empty State -->
+                    <div id="emptyState" class="space-y-4">
+                        <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-rose-100 to-indigo-100 flex items-center justify-center text-rose-600 shadow-md group-hover:scale-105 transition-transform duration-300">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-base sm:text-lg font-bold text-gray-800">
+                                Drag and drop your fashion image here
+                            </p>
+                            <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                                or <span class="text-rose-600 font-semibold underline decoration-2 underline-offset-2">browse from your device</span>
+                            </p>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-200 text-[11px] text-gray-500 font-medium shadow-sm">
+                            <i class="fa-regular fa-image text-gray-400"></i>
+                            <span>Supports JPG, JPEG, PNG, WEBP (Max 10MB)</span>
+                        </div>
+                    </div>
+
+                    <!-- Post-Upload Live Preview State (Hidden by default) -->
+                    <div id="previewState" class="hidden space-y-6" onclick="event.stopPropagation()">
+                        <div class="relative inline-block mx-auto group/preview">
+                            <div class="w-56 h-56 sm:w-64 sm:h-64 rounded-2xl overflow-hidden shadow-2xl border-4 border-white bg-slate-100 mx-auto">
+                                <img id="previewImage" src="" alt="Selected apparel preview" class="w-full h-full object-cover">
+                            </div>
+                            <button 
+                                type="button" 
+                                onclick="removeSelectedImage(event)" 
+                                title="Remove Image"
+                                class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-rose-600 text-white shadow-lg flex items-center justify-center hover:bg-rose-700 transition">
+                                <i class="fa-solid fa-xmark text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- File Details Pill -->
+                        <div class="flex items-center justify-center gap-3 text-xs text-gray-600">
+                            <span id="fileName" class="font-semibold text-gray-900 truncate max-w-xs">image.jpg</span>
+                            <span>&bull;</span>
+                            <span id="fileSize" class="text-gray-500">1.2 MB</span>
+                            <span>&bull;</span>
+                            <button 
+                                type="button" 
+                                onclick="document.getElementById('imageInput').click()" 
+                                class="text-rose-600 font-bold hover:underline">
+                                Choose another
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Action & Loading Bar Container -->
+                <div class="pt-4">
+                    <button 
+                        type="submit" 
+                        id="submitBtn" 
+                        disabled
+                        class="btn-gradient w-full py-4 px-6 text-white text-base font-bold rounded-2xl shadow-lg flex items-center justify-center gap-3 focus:outline-none focus:ring-4 focus:ring-rose-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                        <span id="btnText">Upload &amp; Discover Similar Styles</span>
+                    </button>
+                </div>
+
+                <!-- Progress / Scanning State Overlay (Shown on submit) -->
+                <div id="processingState" class="hidden rounded-2xl p-6 bg-slate-900 text-white space-y-4">
+                    <div class="flex items-center justify-between text-xs sm:text-sm font-semibold">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                            <span id="progressMessage">Analyzing fashion features with ResNet50...</span>
+                        </div>
+                        <span class="text-rose-400 font-mono" id="progressPercent">65%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div id="progressBar" class="bg-gradient-to-r from-rose-500 via-purple-500 to-indigo-500 h-full transition-all duration-300" style="width: 20%;"></div>
+                    </div>
+                    <p class="text-[11px] text-gray-400 text-center">
+                        Scanning textures, silhouette contours, and computing nearest-neighbor distance vectors across 10,000+ items...
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <!-- How It Works Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg font-bold">
+                        1
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900">Upload Any Piece</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        Snap a photo or upload an existing picture of a favorite shirt, dress, jacket, shoes, or accessory.
+                    </p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-50 flex items-center gap-2 text-xs font-semibold text-rose-600">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Simple &amp; Fast</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg font-bold">
+                        2
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900">Neural Feature Scan</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        Deep CNN layers analyze color schemes, fabric patterns, collars, and silhouette aesthetics into a mathematical vector.
+                    </p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-50 flex items-center gap-2 text-xs font-semibold text-purple-600">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>ResNet50 Vision Engine</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg font-bold">
+                        3
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900">Curated Matches</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        Discover top matching garments that pair seamlessly with your personal style and current wardrobe.
+                    </p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-50 flex items-center gap-2 text-xs font-semibold text-indigo-600">
+                    <i class="fa-solid fa-sparkles"></i>
+                    <span>Top-6 Match Inspo</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Pro Tips Card -->
+        <div class="bg-slate-900 rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden shadow-xl">
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-rose-500/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-400">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span>Stylist Tip for Best Results</span>
+                    </div>
+                    <h4 class="text-lg font-bold text-white">Capture your piece with clear lighting</h4>
+                    <p class="text-xs text-gray-300 max-w-xl leading-relaxed">
+                        For highest recommendation accuracy, ensure the clothing piece is centered, unwrinkled, and photographed against a neutral background.
+                    </p>
+                </div>
+                <a href="{% url 'file_review' %}" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 text-xs font-bold text-white transition whitespace-nowrap">
+                    <span>Try Chat Stylist Instead</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Upload Page Interactive Scripts -->
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const imageInput = document.getElementById('imageInput');
+    const emptyState = document.getElementById('emptyState');
+    const previewState = document.getElementById('previewState');
+    const previewImage = document.getElementById('previewImage');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadForm = document.getElementById('uploadForm');
+    const processingState = document.getElementById('processingState');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressMessage = document.getElementById('progressMessage');
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('dragover');
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('dragover');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('dragover');
+        
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            imageInput.files = e.dataTransfer.files;
+            handleFileSelect(e.dataTransfer.files);
+        }
+    }
+
+    function handleFileSelect(files) {
+        if (!files || files.length === 0) return;
+        const file = files[0];
+
+        // Validate image file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select a valid image file (PNG, JPG, JPEG, WEBP).');
+            return;
+        }
+
+        // Validate file size (10MB max)
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File size exceeds 10MB limit. Please choose a smaller image.');
+            return;
+        }
+
+        // Display File Metadata
+        fileName.innerText = file.name;
+        fileSize.innerText = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+        // Read and Render Preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            emptyState.classList.add('hidden');
+            previewState.classList.remove('hidden');
+            submitBtn.removeAttribute('disabled');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeSelectedImage(e) {
+        if (e) e.stopPropagation();
+        imageInput.value = '';
+        previewImage.src = '';
+        emptyState.classList.remove('hidden');
+        previewState.classList.add('hidden');
+        submitBtn.setAttribute('disabled', 'true');
+    }
+
+    // Submit Animation & Simulated Scanning Feedback
+    uploadForm.addEventListener('submit', function(e) {
+        if (!imageInput.files || imageInput.files.length === 0) {
+            e.preventDefault();
+            alert('Please select an image first.');
+            return;
+        }
+
+        submitBtn.setAttribute('disabled', 'true');
+        submitBtn.classList.add('opacity-50', 'cursor-wait');
+        document.getElementById('btnText').innerText = 'Analyzing Image Features...';
+        processingState.classList.remove('hidden');
+
+        // Smooth Progress Simulation
+        let progress = 15;
+        const interval = setInterval(() => {
+            if (progress < 90) {
+                progress += Math.floor(Math.random() * 15) + 5;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+                progressPercent.innerText = progress + '%';
+
+                if (progress > 40 && progress < 70) {
+                    progressMessage.innerText = 'Extracting 2048-dimensional feature vectors...';
+                } else if (progress >= 70) {
+                    progressMessage.innerText = 'Matching nearest neighbor clusters...';
+                }
+            } else {
+                clearInterval(interval);
+            }
+        }, 350);
+    });
+</script>
 {% endblock %}
