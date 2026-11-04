@@ -1,242 +1,874 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
-    <title>Plagiarism checker</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="" name="keywords">
-    <meta content="" name="description">
-    {% load static %}
-
-    <!-- Favicon -->
-    <link href="{% static 'img/favicon.ico' %}" rel="icon">
+    <title>FitFusion &bull; Next-Gen AI Fashion Stylist &amp; Recommendation Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FitFusion is an AI-powered fashion recommendation system. Discover personalized outfit formulas, upload apparel photos to find matching styles with ResNet50, and chat with your personal AI stylist.">
     
-    <!-- Google Web Fonts -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500&family=Jost:wght@500;600;700&display=swap" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
     
-    <!-- Icon Font Stylesheet -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Libraries Stylesheet -->
-    <link href="{% static 'lib/animate/animate.min.css' %}" rel="stylesheet">
-    <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
-    
-    <!-- Customized Bootstrap Stylesheet -->
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    
-    <!-- Template Stylesheet -->
-    <link href="{% static 'css/style.css' %}" rel="stylesheet">
-    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fdf4f7',
+                            100: '#fbe8ef',
+                            500: '#e11d48',
+                            600: '#be123c',
+                            700: '#9f1239',
+                            900: '#4c0519',
+                        },
+                        slateDark: '#0B0F19',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0B0F19;
+            color: #F8FAFC;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Glow & Mesh Backgrounds */
+        .ambient-mesh {
+            background: radial-gradient(circle at 10% 15%, rgba(99, 102, 241, 0.22) 0%, transparent 45%),
+                        radial-gradient(circle at 90% 80%, rgba(225, 29, 72, 0.20) 0%, transparent 45%),
+                        radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.14) 0%, transparent 55%),
+                        #0B0F19;
+        }
+
+        .dark-glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .light-glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #e11d48 0%, #9333ea 50%, #4f46e5 100%);
+            background-size: 200% auto;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-gradient:hover {
+            background-position: right center;
+            box-shadow: 0 10px 30px -5px rgba(225, 29, 72, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .brand-gradient-text {
+            background: linear-gradient(135deg, #f43f5e 0%, #c084fc 50%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+    </style>
 </head>
+<body x-data="{ mobileMenu: false, activeStylePrompt: 'casual' }">
 
-<body data-bs-spy="scroll" data-bs-target=".navbar" data-bs-offset="51">
-    <div class="container-xxl bg-white p-0">
-        <!-- Spinner Start -->
-        <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
-            <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status">
-                <span class="sr-only">Loading...</span>
-            </div>
-        </div>
-        <!-- Spinner End -->
-
-
-        <!-- Navbar & Hero Start -->
-        <div class="container-xxl position-relative p-0" id="home">
-            <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0">
-                <a href="" class="navbar-brand p-0">
-                    <h1 class="m-0">FitFusion</h1>
-                    <!-- <img src="img/logo.png" alt="Logo"> -->
+    <!-- Sticky Navigation Bar -->
+    <header class="fixed top-0 inset-x-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-white/10 transition duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Brand Logo -->
+                <a href="{% url 'home' %}" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 via-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-rose-500/30 group-hover:scale-105 transition duration-300">
+                        <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-extrabold tracking-tight text-white leading-none">FitFusion<span class="text-rose-500">.ai</span></span>
+                        <span class="text-[10px] tracking-widest uppercase font-semibold text-gray-400 mt-1">AI Wardrobe &amp; Style</span>
+                    </div>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                    <span class="fa fa-bars"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarCollapse">
-                    <div class="navbar-nav mx-auto py-0">
-                        <a href="#home" class="nav-item nav-link ">Home</a>
-                        <a href="#about" class="nav-item nav-link">About</a>
-                        <a href="#feature" class="nav-item nav-link">Feature</a>
-                        <a href="#pricing" class="nav-item nav-link">Pricing</a>
-                        <a href="#review" class="nav-item nav-link">Review</a>
-                        <a href="#contact" class="nav-item nav-link">Contact</a>
-                    </div>
-                    <a href="{% url 'login' %}" class="btn btn-primary-gradient rounded-pill py-2 px-4 ms-3 d-none d-lg-block">Login / Sign Up</a>
+
+                <!-- Desktop Nav Links -->
+                <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-300">
+                    <a href="#features" class="hover:text-white transition">Features</a>
+                    <a href="#how-it-works" class="hover:text-white transition">How It Works</a>
+                    <a href="#piece-inspo" class="hover:text-white transition">Piece Inspo</a>
+                    <a href="#demo-preview" class="hover:text-white transition">Style Preview</a>
+                    <a href="#faq" class="hover:text-white transition">FAQ</a>
+                </nav>
+
+                <!-- Auth Action Buttons -->
+                <div class="hidden md:flex items-center gap-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="text-sm font-semibold text-gray-300 hover:text-white transition flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/5">
+                            <i class="fa-solid fa-table-cells-large text-rose-400"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="{% url 'fashion_recommend' %}" class="btn-gradient px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-lg">
+                            <span>Open Studio</span>
+                            <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i>
+                        </a>
+                        <form method="POST" action="{% url 'logout' %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="text-xs font-semibold text-gray-400 hover:text-white transition px-3 py-2">
+                                Logout
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-sm font-semibold text-gray-300 hover:text-white transition px-4 py-2 rounded-xl hover:bg-white/5">
+                            Sign In
+                        </a>
+                        <a href="{% url 'register' %}" class="btn-gradient px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-lg">
+                            <span>Get Started Free</span>
+                            <i class="fa-solid fa-arrow-right text-[10px] ml-1.5"></i>
+                        </a>
+                    {% endif %}
                 </div>
-            </nav>
 
-            <div class="container-xxl bg-primary hero-header">
-                <div class="container px-lg-5">
-                    <div class="row g-5" style="
-                    display: flex;
-                    flex-direction: row;
-                ">
-                        <div class="col-lg-8 text-center text-lg-start" style="
-                        width: 63%;
-                    ">
-                            <h1 class="text-white mb-4 animated slideInDown">The AI-Powered Fashion Recommendation System</h1>
-                            <p class="text-white pb-3 animated slideInDown">Our AI Style Assistant helps you discover personalized fashion suggestions, ensuring you always stay on trend. Using advanced machine learning algorithms, this tool analyzes your preferences and current trends to provide curated outfit ideas that match your unique style.</p>
-
-                            <a href="" class="btn btn-primary-gradient py-sm-3 px-4 px-sm-5 rounded-pill me-3 animated slideInLeft">Learn More</a>
-                            <a href="{% url 'register' %}" class="btn btn-secondary-gradient py-sm-3 px-4 px-sm-5 rounded-pill animated slideInRight">Get Started</a>
-                            
-                        </div>
-                      
-                            <div style="
-                            width: 35%;
-                            position: relative;
-    top: -5rem;
-                        ">
-
-                                <img style="
-                                display: flex;
-                                flex-direction: row;
-
-
-                            " class="" src="{% static 'img/8064118x.png' %}" alt="">
-                                {% comment %} <img class="img-fluid" src="{% static 'img/screenshot-2.jpg' %}" alt="">
-                                <img class="img-fluid" src="{% static 'img/screenshot-3.jpg' %}" alt="">
-                                <img class="img-fluid" src="{% static 'img/screenshot-4.png' %}" alt="">
-                                <img class="img-fluid" src="{% static 'img/screenshot-5.jpg' %}" alt=""> {% endcomment %}
-                                
-                            </div>
-                     
-                    </div>
+                <!-- Mobile Hamburger Button -->
+                <div class="md:hidden">
+                    <button @click="mobileMenu = !mobileMenu" class="text-gray-300 hover:text-white p-2 text-xl focus:outline-none">
+                        <i :class="mobileMenu ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'"></i>
+                    </button>
                 </div>
-            </div>
-            {% block hero %}{% endblock %}
-        </div>
-        <!-- Navbar & Hero End -->
-
-
-      <!-- About Start -->
-<div class="container-xxl py-5" id="about">
-    <div class="container py-5 px-lg-5">
-        <div class="row g-5 align-items-center">
-            <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
-                <h5 class="text-primary-gradient fw-medium">About App</h5>
-                <h1 class="mb-4">#1 AI Fashion Recommendation App</h1>
-                <p class="mb-4">Fitfusion is an innovative, AI-powered fashion recommendation app designed to help you discover outfits that match your personal style. Whether you're looking for a daily look or a special event outfit, Fitfusion uses cutting-edge algorithms to offer personalized suggestions that fit your taste, preferences, and budget.</p>
-                <div class="row g-4 mb-4">
-                    <div class="col-sm-6 wow fadeIn" data-wow-delay="0.5s">
-                        <div class="d-flex">
-                            <i class="fa fa-users fa-2x text-primary-gradient flex-shrink-0 mt-1"></i>
-                            <div class="ms-3">
-                                <h2 class="mb-0" data-toggle="counter-up">5678</h2>
-                                <p class="text-primary-gradient mb-0">Happy Users</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 wow fadeIn" data-wow-delay="0.7s">
-                        <div class="d-flex">
-                            <i class="fa fa-thumbs-up fa-2x text-secondary-gradient flex-shrink-0 mt-1"></i>
-                            <div class="ms-3">
-                                <h2 class="mb-0" data-toggle="counter-up">2345</h2>
-                                <p class="text-secondary-gradient mb-0">Outfits Suggested</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <a href="" class="btn btn-primary-gradient py-sm-3 px-4 px-sm-5 rounded-pill mt-3">Explore Your Style</a>
-            </div>
-            <div class="col-lg-6">
-                <img class="img-fluid wow fadeInUp" data-wow-delay="0.5s" src="{% static 'img/cx.jpeg' %}">
             </div>
         </div>
-    </div>
-</div>
-<!-- About End -->
 
+        <!-- Mobile Drawer Menu -->
+        <div x-show="mobileMenu" 
+             x-cloak 
+             @click.away="mobileMenu = false"
+             class="md:hidden bg-slate-950/95 border-b border-white/10 px-6 py-6 space-y-4 text-center">
+            <a @click="mobileMenu = false" href="#features" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">Features</a>
+            <a @click="mobileMenu = false" href="#how-it-works" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">How It Works</a>
+            <a @click="mobileMenu = false" href="#piece-inspo" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">Piece Inspo</a>
+            <a @click="mobileMenu = false" href="#demo-preview" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">Style Preview</a>
+            <a @click="mobileMenu = false" href="#faq" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">FAQ</a>
 
+            <div class="pt-4 border-t border-white/10 space-y-3">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="block w-full py-3 rounded-xl bg-white/10 text-white text-sm font-bold">
+                        Go to Dashboard
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="block w-full py-3 rounded-xl bg-white/10 text-white text-sm font-bold">
+                        Sign In
+                    </a>
+                    <a href="{% url 'register' %}" class="btn-gradient block w-full py-3 rounded-xl text-white text-sm font-bold shadow-lg">
+                        Get Started Free
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
 
+    <!-- Hero Section -->
+    <section class="relative pt-36 pb-20 lg:pt-48 lg:pb-32 ambient-mesh overflow-hidden">
         
+        <!-- Background Lighting Blobs -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-rose-500/15 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute top-1/3 -left-32 w-[450px] h-[450px] bg-indigo-500/15 rounded-full blur-[130px] pointer-events-none"></div>
 
-        <!-- Footer Start -->
-        <div class="container-fluid bg-primary text-light footer wow fadeIn" data-wow-delay="0.1s">
-            <div class="container py-5 px-lg-5">
-                <div class="row g-5">
-                    <div class="col-md-6 col-lg-3">
-                        <h4 class="text-white mb-4">Address</h4>
-                        <p><i class="fa fa-map-marker-alt me-3"></i>123 Street, New York, USA</p>
-                        <p><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
-                        <p><i class="fa fa-envelope me-3"></i>FitFusion@example.com</p>
-                        <div class="d-flex pt-2">
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-instagram"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+                
+                <!-- Left Hero Text Content -->
+                <div class="lg:col-span-7 space-y-8 text-center lg:text-left">
+                    
+                    <!-- Pill Badge -->
+                    <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-inner text-xs font-semibold text-rose-300">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                        <span>Powered by ResNet50 Deep Vision &amp; Generative AI</span>
+                    </div>
+
+                    <!-- Main Headline -->
+                    <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1]">
+                        Curate Your <br>
+                        <span class="brand-gradient-text font-serif italic">Signature Style</span> <br>
+                        with AI Precision.
+                    </h1>
+
+                    <!-- Paragraph description -->
+                    <p class="text-base sm:text-lg text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light">
+                        Never wonder what to wear again. FitFusion analyzes your favorite apparel with deep neural vision, matches complementary pieces across 10,000+ fashion styles, and provides tailored outfit formulas for every occasion.
+                    </p>
+
+                    <!-- CTAs & Action Pills -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'fashion_recommend' %}" class="btn-gradient w-full sm:w-auto px-8 py-4 rounded-2xl text-sm font-bold text-white shadow-xl flex items-center justify-center gap-3">
+                                <i class="fa-solid fa-camera"></i>
+                                <span>Launch Piece Inspo</span>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
+                            <a href="{% url 'file_review' %}" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-sm font-bold text-white transition flex items-center justify-center gap-3 backdrop-blur-md">
+                                <i class="fa-solid fa-comments text-purple-400"></i>
+                                <span>Chat Stylist</span>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'register' %}" class="btn-gradient w-full sm:w-auto px-8 py-4 rounded-2xl text-sm font-bold text-white shadow-xl flex items-center justify-center gap-3">
+                                <span>Get Started &bull; Free Account</span>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
+                            <a href="{% url 'login' %}" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-sm font-bold text-white transition flex items-center justify-center gap-3 backdrop-blur-md">
+                                <i class="fa-solid fa-lock text-rose-400"></i>
+                                <span>Sign In</span>
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Trust Stats Bar -->
+                    <div class="pt-6 border-t border-white/10 grid grid-cols-3 gap-6 text-center lg:text-left">
+                        <div>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-white">10,000+</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Curated Garments</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-rose-400">98.4%</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Style Match Rate</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-indigo-400">Instant</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Vision Similarity</p>
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-3">
-                        <h4 class="text-white mb-4">Quick Link</h4>
-                        <a class="btn btn-link" href="">About Us</a>
-                        <a class="btn btn-link" href="">Contact Us</a>
-                        <a class="btn btn-link" href="">Privacy Policy</a>
-                        <a class="btn btn-link" href="">Terms & Condition</a>
-                        <a class="btn btn-link" href="">Career</a>
-                    </div>
-                    <div class="col-md-6 col-lg-3">
-                        <h4 class="text-white mb-4">Popular Link</h4>
-                        <a class="btn btn-link" href="">About Us</a>
-                        <a class="btn btn-link" href="">Contact Us</a>
-                        <a class="btn btn-link" href="">Privacy Policy</a>
-                        <a class="btn btn-link" href="">Terms & Condition</a>
-                        <a class="btn btn-link" href="">Career</a>
-                    </div>
-                    <div class="col-md-6 col-lg-3">
-                        <h4 class="text-white mb-4">Newsletter</h4>
-                        <p>Get exclusive access to promotions, discounts, and early-bird access to new features as a newsletter subscriber.</p>
-                        <div class="position-relative w-100 mt-3">
-                            <input class="form-control border-0 rounded-pill w-100 ps-4 pe-5" type="text" placeholder="Your Email" style="height: 48px;">
-                            <button type="button" class="btn shadow-none position-absolute top-0 end-0 mt-1 me-2"><i class="fa fa-paper-plane text-primary-gradient fs-4"></i></button>
-                        </div>
-                    </div>
+
                 </div>
-            </div>
-            <div class="container px-lg-5">
-                <div class="copyright">
-                    <div class="row">
-                        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                            &copy; <a class="border-bottom" href="#">FitFusion.com</a>, All Right Reserved. 
-							
-							<!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-							Designed By FitFusion
+
+                <!-- Right Visual: Floating AI Outfit Curation Showcase -->
+                <div class="lg:col-span-5 relative">
+                    
+                    <!-- Main Curation Card -->
+                    <div class="dark-glass-card rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 animate-float">
+                        
+                        <!-- Top Header with Match Score -->
+                        <div class="flex items-center justify-between pb-5 border-b border-white/10">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-white text-base shadow-md">
+                                    <i class="fa-solid fa-sparkles"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-bold text-white">AI Outfit Formula</h3>
+                                    <p class="text-xs text-gray-400">Smart-Casual Evening Occasion</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                98.7% Harmonious
+                            </span>
                         </div>
-                        <div class="col-md-6 text-center text-md-end">
-                            <div class="footer-menu">
-                                <a href="">Home</a>
-                                <a href="">Cookies</a>
-                                <a href="">Help</a>
-                                <a href="">FQAs</a>
+
+                        <!-- Curation Itemized Layers -->
+                        <div class="mt-5 space-y-3 text-xs">
+                            <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 text-gray-300 hover:bg-white/10 transition">
+                                <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-shirt"></i>
+                                </div>
+                                <div class="flex-1 truncate">
+                                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Topwear</span>
+                                    <span class="text-white font-medium">Satin Open-Collar Shirt in Tuscan Sand</span>
+                                </div>
+                                <span class="text-[10px] text-gray-400 font-mono">#9021</span>
+                            </div>
+
+                            <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 text-gray-300 hover:bg-white/10 transition">
+                                <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-vest"></i>
+                                </div>
+                                <div class="flex-1 truncate">
+                                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Layering</span>
+                                    <span class="text-white font-medium">Minimalist Navy Wool-Blend Overshirt</span>
+                                </div>
+                                <span class="text-[10px] text-gray-400 font-mono">#4412</span>
+                            </div>
+
+                            <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 text-gray-300 hover:bg-white/10 transition">
+                                <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-shoe-prints"></i>
+                                </div>
+                                <div class="flex-1 truncate">
+                                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Footwear</span>
+                                    <span class="text-white font-medium">Chelsea Suede Boots in Deep Umber</span>
+                                </div>
+                                <span class="text-[10px] text-gray-400 font-mono">#7819</span>
+                            </div>
+                        </div>
+
+                        <!-- Color Harmony Palette -->
+                        <div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-between">
+                            <span class="text-xs font-semibold text-gray-400">Palette Harmony</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-5 h-5 rounded-full bg-[#1e293b] border border-white/30" title="Slate Obsidian"></span>
+                                <span class="w-5 h-5 rounded-full bg-[#d97706] border border-white/30" title="Tuscan Amber"></span>
+                                <span class="w-5 h-5 rounded-full bg-[#3b82f6] border border-white/30" title="Classic Navy"></span>
+                                <span class="w-5 h-5 rounded-full bg-[#f8fafc] border border-white/30" title="Pure Ivory"></span>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Floating Mini Accent 1: Computer Vision ResNet50 Badge -->
+                    <div class="hidden sm:flex absolute -top-6 -right-6 dark-glass-card px-4 py-3 rounded-2xl shadow-xl border border-white/10 items-center gap-3 z-20">
+                        <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-white">ResNet50 Vision</p>
+                            <p class="text-[10px] text-gray-400">2048-D Vector Embeddings</p>
+                        </div>
+                    </div>
+
+                    <!-- Floating Mini Accent 2: Live Stylist Badge -->
+                    <div class="hidden sm:flex absolute -bottom-6 -left-6 dark-glass-card px-4 py-3 rounded-2xl shadow-xl border border-white/10 items-center gap-3 z-20">
+                        <div class="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-white">Gemini &amp; Groq AI</p>
+                            <p class="text-[10px] text-gray-400">Instant Style Generation</p>
+                        </div>
+                    </div>
+
                 </div>
+
             </div>
         </div>
-        <!-- Footer End -->
+    </section>
 
+    <!-- Interactive Style Preview Section -->
+    <section id="demo-preview" class="py-24 bg-slate-950/70 border-y border-white/5 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-xs font-semibold text-rose-400">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Try Before You Sign In</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+                    Explore How FitFusion Outfits Look
+                </h2>
+                <p class="text-sm sm:text-base text-gray-400 font-light">
+                    Select an occasion below to see how our AI crafts curated, cohesive clothing formulas for different vibes and settings.
+                </p>
+            </div>
 
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-lg-square back-to-top pt-2"><i class="bi bi-arrow-up text-white"></i></a>
-    </div>
+            <!-- Occasion Switcher Tabs -->
+            <div class="flex flex-wrap items-center justify-center gap-3 mb-12">
+                <button 
+                    @click="activeStylePrompt = 'casual'"
+                    :class="activeStylePrompt === 'casual' ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30' : 'bg-slate-900 text-gray-400 hover:text-white border border-white/10'"
+                    class="px-5 py-2.5 rounded-2xl text-xs font-bold transition duration-200">
+                    ☕ Smart-Casual Everyday
+                </button>
+                <button 
+                    @click="activeStylePrompt = 'formal'"
+                    :class="activeStylePrompt === 'formal' ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30' : 'bg-slate-900 text-gray-400 hover:text-white border border-white/10'"
+                    class="px-5 py-2.5 rounded-2xl text-xs font-bold transition duration-200">
+                    💼 Office &amp; Business Interview
+                </button>
+                <button 
+                    @click="activeStylePrompt = 'party'"
+                    :class="activeStylePrompt === 'party' ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30' : 'bg-slate-900 text-gray-400 hover:text-white border border-white/10'"
+                    class="px-5 py-2.5 rounded-2xl text-xs font-bold transition duration-200">
+                    🍸 Night Out &amp; Celebration
+                </button>
+                <button 
+                    @click="activeStylePrompt = 'summer'"
+                    :class="activeStylePrompt === 'summer' ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30' : 'bg-slate-900 text-gray-400 hover:text-white border border-white/10'"
+                    class="px-5 py-2.5 rounded-2xl text-xs font-bold transition duration-200">
+                    🏖️ Beach &amp; Summer Resort
+                </button>
+            </div>
 
-    {% load static %}
+            <!-- Dynamic Interactive Card Content -->
+            <div class="max-w-4xl mx-auto dark-glass-card rounded-3xl p-6 sm:p-10 border border-white/10 shadow-2xl">
+                
+                <!-- Casual Vibe -->
+                <div x-show="activeStylePrompt === 'casual'" class="space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-2">
+                        <div>
+                            <span class="text-xs uppercase font-bold text-rose-400">Casual Elegance</span>
+                            <h3 class="text-xl font-bold text-white">Effortless Weekend Brunch &amp; Streetwear</h3>
+                        </div>
+                        <span class="text-xs font-mono px-3 py-1 rounded-full bg-slate-800 text-gray-300">Style Match &bull; 99%</span>
+                    </div>
 
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'lib/wow/wow.min.js' %}"></script>
-    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
-    <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
-    <script src="{% static 'lib/counterup/counterup.min.js' %}"></script>
-    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
-    
-    <!-- Template Javascript -->
-    <script src="{% static 'js/main.js' %}"></script>
-    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-rose-400 block"><i class="fa-solid fa-shirt mr-1"></i> Topwear</span>
+                            <p class="text-gray-200">Premium heavyweight cotton crewneck or Cuban-collar overshirt in sage/beige.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-indigo-400 block"><i class="fa-solid fa-vest mr-1"></i> Bottomwear</span>
+                            <p class="text-gray-200">Relaxed tapered khaki chinos or slim washed indigo denim jeans.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-purple-400 block"><i class="fa-solid fa-shoe-prints mr-1"></i> Footwear</span>
+                            <p class="text-gray-200">Crisp low-top clean white leather sneakers with neutral no-show socks.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-amber-400 block"><i class="fa-solid fa-glasses mr-1"></i> Accessories</span>
+                            <p class="text-gray-200">Minimalist leather-strap analog watch &amp; classic round sunglasses.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formal Vibe -->
+                <div x-show="activeStylePrompt === 'formal'" class="space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-2">
+                        <div>
+                            <span class="text-xs uppercase font-bold text-rose-400">Professional Chic</span>
+                            <h3 class="text-xl font-bold text-white">High-Stakes Corporate &amp; Executive Meeting</h3>
+                        </div>
+                        <span class="text-xs font-mono px-3 py-1 rounded-full bg-slate-800 text-gray-300">Style Match &bull; 97%</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-rose-400 block"><i class="fa-solid fa-shirt mr-1"></i> Topwear</span>
+                            <p class="text-gray-200">Tailored slim-fit poplin button-down in French blue or crisp white.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-indigo-400 block"><i class="fa-solid fa-vest mr-1"></i> Layering</span>
+                            <p class="text-gray-200">Structured dark navy hopsack blazer with notched lapels.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-purple-400 block"><i class="fa-solid fa-shoe-prints mr-1"></i> Footwear</span>
+                            <p class="text-gray-200">Burnished dark brown Oxford or Cap-Toe leather dress shoes.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-amber-400 block"><i class="fa-solid fa-briefcase mr-1"></i> Accessories</span>
+                            <p class="text-gray-200">Matching leather belt, subtle sterling silver cufflinks, slim briefcase.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Party Vibe -->
+                <div x-show="activeStylePrompt === 'party'" class="space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-2">
+                        <div>
+                            <span class="text-xs uppercase font-bold text-rose-400">Night Glam</span>
+                            <h3 class="text-xl font-bold text-white">Cocktail Lounge, Gala or Evening Dinner</h3>
+                        </div>
+                        <span class="text-xs font-mono px-3 py-1 rounded-full bg-slate-800 text-gray-300">Style Match &bull; 98%</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-rose-400 block"><i class="fa-solid fa-shirt mr-1"></i> Topwear</span>
+                            <p class="text-gray-200">Silk-blend camp collar shirt in midnight noir or deep burgundy.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-indigo-400 block"><i class="fa-solid fa-vest mr-1"></i> Layering</span>
+                            <p class="text-gray-200">Tailored supple biker leather jacket or velvet textured blazer.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-purple-400 block"><i class="fa-solid fa-shoe-prints mr-1"></i> Footwear</span>
+                            <p class="text-gray-200">Black polished Chelsea boots or understated dress loafers.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-amber-400 block"><i class="fa-solid fa-gem mr-1"></i> Accent</span>
+                            <p class="text-gray-200">Sleek metallic wrist chain and signature warm cedarwood scent.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summer Vibe -->
+                <div x-show="activeStylePrompt === 'summer'" class="space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-2">
+                        <div>
+                            <span class="text-xs uppercase font-bold text-rose-400">Resort &amp; Coastal</span>
+                            <h3 class="text-xl font-bold text-white">Sunny Coastlines &amp; Mediterranean Holidays</h3>
+                        </div>
+                        <span class="text-xs font-mono px-3 py-1 rounded-full bg-slate-800 text-gray-300">Style Match &bull; 99%</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-rose-400 block"><i class="fa-solid fa-shirt mr-1"></i> Topwear</span>
+                            <p class="text-gray-200">Airy relaxed-fit 100% linen shirt in off-white, olive, or sky blue.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-indigo-400 block"><i class="fa-solid fa-vest mr-1"></i> Bottomwear</span>
+                            <p class="text-gray-200">Lightweight cotton-linen drawstring shorts or tapered ecru trousers.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-purple-400 block"><i class="fa-solid fa-shoe-prints mr-1"></i> Footwear</span>
+                            <p class="text-gray-200">Handwoven slip-on espadrilles or minimalist tan leather slides.</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                            <span class="font-bold text-amber-400 block"><i class="fa-solid fa-sun mr-1"></i> Accessories</span>
+                            <p class="text-gray-200">Tortoiseshell polarized shades &amp; woven Panama straw hat.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Callout Action inside Preview -->
+                <div class="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p class="text-xs text-gray-400 text-center sm:text-left">
+                        Want custom recommendations tailored to your wardrobe and body measurements?
+                    </p>
+                    <a href="{% url 'register' %}" class="btn-gradient px-6 py-2.5 rounded-xl text-xs font-bold text-white shadow-md whitespace-nowrap">
+                        Create Free Account
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Key Core Features Grid -->
+    <section id="features" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-semibold text-purple-400">
+                    <i class="fa-solid fa-cube"></i>
+                    <span>Next-Generation Capabilities</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+                    Built for Modern Wardrobes &amp; Trendsetters
+                </h2>
+                <p class="text-sm sm:text-base text-gray-400 font-light">
+                    FitFusion integrates computer vision neural networks with conversational LLMs to deliver an unparalleled personal shopping and styling experience.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Feature 1 -->
+                <div class="dark-glass-card rounded-3xl p-8 border border-white/10 hover:border-rose-500/30 transition-all duration-300 space-y-5 group">
+                    <div class="w-14 h-14 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-2xl group-hover:scale-110 transition duration-300">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Visual Piece Inspo</h3>
+                    <p class="text-xs sm:text-sm text-gray-400 leading-relaxed font-light">
+                        Upload any single apparel item you love. ResNet50 scans 2048 distinct visual dimensions to instantly retrieve nearest-neighbor matches from our 10,000+ item catalog.
+                    </p>
+                    <div class="pt-2">
+                        <span class="text-xs font-bold text-rose-400 flex items-center gap-1 group-hover:translate-x-1 transition">
+                            <span>Deep Feature Vectors</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="dark-glass-card rounded-3xl p-8 border border-white/10 hover:border-purple-500/30 transition-all duration-300 space-y-5 group">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl group-hover:scale-110 transition duration-300">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Conversational AI Stylist</h3>
+                    <p class="text-xs sm:text-sm text-gray-400 leading-relaxed font-light">
+                        Chat directly with an AI fashion director powered by Gemini 1.5 Flash and LLaMA 3. Specify colors, occasions, climates, and budgets for curated head-to-toe outfits.
+                    </p>
+                    <div class="pt-2">
+                        <span class="text-xs font-bold text-purple-400 flex items-center gap-1 group-hover:translate-x-1 transition">
+                            <span>Occasion Formulas</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="dark-glass-card rounded-3xl p-8 border border-white/10 hover:border-indigo-500/30 transition-all duration-300 space-y-5 group">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-2xl group-hover:scale-110 transition duration-300">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Fail-Safe Intelligence</h3>
+                    <p class="text-xs sm:text-sm text-gray-400 leading-relaxed font-light">
+                        Multi-tiered fallback architecture ensures zero downtime. If cloud APIs are congested, our embedded expert rules engine generates stylish recommendations without delay.
+                    </p>
+                    <div class="pt-2">
+                        <span class="text-xs font-bold text-indigo-400 flex items-center gap-1 group-hover:translate-x-1 transition">
+                            <span>High Availability</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-24 bg-slate-950/60 border-t border-white/5 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-20 space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-400">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Simple 3-Step Process</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+                    How FitFusion Transforms Your Look
+                </h2>
+                <p class="text-sm sm:text-base text-gray-400 font-light">
+                    Getting world-class outfit recommendations is fast, effortless, and tailored to you.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                
+                <!-- Step 1 -->
+                <div class="dark-glass-card rounded-3xl p-8 border border-white/10 relative">
+                    <span class="text-6xl font-black text-white/5 absolute top-6 right-6">01</span>
+                    <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-base mb-6">
+                        1
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Upload or Prompt</h3>
+                    <p class="text-xs sm:text-sm text-gray-400 leading-relaxed font-light">
+                        Upload a photo of any apparel item you want inspiration for, or type your preferred aesthetic into our chat stylist.
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="dark-glass-card rounded-3xl p-8 border border-white/10 relative">
+                    <span class="text-6xl font-black text-white/5 absolute top-6 right-6">02</span>
+                    <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-base mb-6">
+                        2
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Neural Vector Analysis</h3>
+                    <p class="text-xs sm:text-sm text-gray-400 leading-relaxed font-light">
+                        Our convolutional network breaks down textures, silhouettes, collar structures, and tones into high-dimensional embeddings.
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="dark-glass-card rounded-3xl p-8 border border-white/10 relative">
+                    <span class="text-6xl font-black text-white/5 absolute top-6 right-6">03</span>
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-base mb-6">
+                        3
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Curated Recommendation</h3>
+                    <p class="text-xs sm:text-sm text-gray-400 leading-relaxed font-light">
+                        Instantly receive top 6 visual matching pieces, color-harmonious palettes, and styling recommendations ready to wear.
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Piece Inspo Spotlight Banner -->
+            <div id="piece-inspo" class="mt-16 bg-gradient-to-r from-rose-950/40 via-purple-950/40 to-indigo-950/40 rounded-3xl p-8 sm:p-12 border border-white/10 flex flex-col lg:flex-row items-center justify-between gap-8">
+                <div class="space-y-3 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs font-semibold">
+                        <i class="fa-solid fa-sparkles"></i>
+                        <span>Piece Inspo Studio</span>
+                    </div>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-white">
+                        Have an apparel piece you love? Find matching items now.
+                    </h3>
+                    <p class="text-xs sm:text-sm text-gray-300 max-w-xl font-light">
+                        Our drag-and-drop studio gives you live image previews, instant neural scans, and ranked nearest-neighbor recommendations.
+                    </p>
+                </div>
+
+                <div class="shrink-0">
+                    <a href="{% url 'fashion_recommend' %}" class="btn-gradient px-8 py-4 rounded-2xl text-sm font-bold text-white shadow-xl flex items-center gap-3">
+                        <i class="fa-solid fa-camera"></i>
+                        <span>Try Piece Inspo Studio</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-24 relative">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            
+            <div class="text-center space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">
+                    <i class="fa-solid fa-circle-question text-rose-400"></i>
+                    <span>Got Questions?</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                    Frequently Asked Questions
+                </h2>
+            </div>
+
+            <div class="space-y-4">
+                
+                <div class="dark-glass-card rounded-2xl p-6 border border-white/10 space-y-2">
+                    <h4 class="text-base font-bold text-white flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-chevron-right text-rose-400 text-sm"></i>
+                        <span>How does the image piece recommendation work?</span>
+                    </h4>
+                    <p class="text-xs sm:text-sm text-gray-400 pl-6 leading-relaxed font-light">
+                        When you upload a garment photo, our backend loads a deep 50-layer Convolutional Neural Network (ResNet50). It removes the classification layer and extracts a 2048-dimensional mathematical feature representation of the clothing's silhouette, textures, and contours. It then runs nearest-neighbor vector search to surface the top 6 closest matching items in our database.
+                    </p>
+                </div>
+
+                <div class="dark-glass-card rounded-2xl p-6 border border-white/10 space-y-2">
+                    <h4 class="text-base font-bold text-white flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-chevron-right text-purple-400 text-sm"></i>
+                        <span>What models power the outfit chat assistant?</span>
+                    </h4>
+                    <p class="text-xs sm:text-sm text-gray-400 pl-6 leading-relaxed font-light">
+                        Our assistant operates on a multi-tier AI engine. It primarily uses Google Gemini 1.5 Flash, with automatic failover to Meta LLaMA 3 70B on Groq for ultra-fast styling responses, and an offline expert rules engine if network connectivity is interrupted.
+                    </p>
+                </div>
+
+                <div class="dark-glass-card rounded-2xl p-6 border border-white/10 space-y-2">
+                    <h4 class="text-base font-bold text-white flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-chevron-right text-indigo-400 text-sm"></i>
+                        <span>Is FitFusion free to use?</span>
+                    </h4>
+                    <p class="text-xs sm:text-sm text-gray-400 pl-6 leading-relaxed font-light">
+                        Yes! Free registration grants you a generous monthly query allowance (100 queries/month) across image similarity matching and conversational outfit suggestions.
+                    </p>
+                </div>
+
+                <div class="dark-glass-card rounded-2xl p-6 border border-white/10 space-y-2">
+                    <h4 class="text-base font-bold text-white flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-chevron-right text-emerald-400 text-sm"></i>
+                        <span>Are my uploaded photos kept private?</span>
+                    </h4>
+                    <p class="text-xs sm:text-sm text-gray-400 pl-6 leading-relaxed font-light">
+                        Absolutely. Uploaded images are strictly used for your active session to extract visual features and compute similarity rankings. They are never shared or sold to third parties.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Bottom Big Call to Action -->
+    <section class="py-20 relative overflow-hidden bg-gradient-to-b from-slate-950 to-black border-t border-white/10">
+        <div class="absolute inset-0 bg-radial-at-c from-rose-600/10 via-transparent to-transparent pointer-events-none"></div>
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 relative z-10">
+            <h2 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
+                Ready to Upgrade Your <br>
+                <span class="brand-gradient-text font-serif italic">Everyday Style?</span>
+            </h2>
+            <p class="text-sm sm:text-base text-gray-400 max-w-xl mx-auto font-light">
+                Join thousands of fashion enthusiasts who use FitFusion to discover personalized, trend-setting outfits effortlessly.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn-gradient w-full sm:w-auto px-10 py-4 rounded-2xl text-sm font-bold text-white shadow-2xl flex items-center justify-center gap-3">
+                        <span>Go to My Dashboard</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                {% else %}
+                    <a href="{% url 'register' %}" class="btn-gradient w-full sm:w-auto px-10 py-4 rounded-2xl text-sm font-bold text-white shadow-2xl flex items-center justify-center gap-3">
+                        <span>Create Free Account</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                    <a href="{% url 'login' %}" class="w-full sm:w-auto px-10 py-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-sm font-bold text-white transition flex items-center justify-center gap-3">
+                        <span>Member Login</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black py-14 border-t border-white/10 text-gray-400 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                
+                <!-- Col 1: Brand Info -->
+                <div class="space-y-4 md:col-span-1">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-500 to-indigo-600 flex items-center justify-center text-white text-xs">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <span class="text-lg font-extrabold text-white">FitFusion<span class="text-rose-500">.ai</span></span>
+                    </div>
+                    <p class="text-gray-400 leading-relaxed font-light">
+                        The intelligent AI stylist and wardrobe recommendation platform combining deep vision with conversational curation.
+                    </p>
+                </div>
+
+                <!-- Col 2: Navigation -->
+                <div class="space-y-3">
+                    <h5 class="text-white font-bold uppercase tracking-wider text-[11px]">Product Features</h5>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'fashion_recommend' %}" class="hover:text-white transition">Piece Inspo Studio</a></li>
+                        <li><a href="{% url 'file_review' %}" class="hover:text-white transition">Chat Outfit Stylist</a></li>
+                        <li><a href="{% url 'dashboard' %}" class="hover:text-white transition">User Dashboard</a></li>
+                        <li><a href="#how-it-works" class="hover:text-white transition">How It Works</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Technology -->
+                <div class="space-y-3">
+                    <h5 class="text-white font-bold uppercase tracking-wider text-[11px]">AI Technology</h5>
+                    <ul class="space-y-2">
+                        <li><span class="text-gray-400">ResNet50 Deep CNN</span></li>
+                        <li><span class="text-gray-400">2048-D Nearest Neighbors</span></li>
+                        <li><span class="text-gray-400">Google Gemini 1.5 Flash</span></li>
+                        <li><span class="text-gray-400">Groq LLaMA 3 70B</span></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Account & Security -->
+                <div class="space-y-3">
+                    <h5 class="text-white font-bold uppercase tracking-wider text-[11px]">Account &amp; Access</h5>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'login' %}" class="hover:text-white transition">Sign In</a></li>
+                        <li><a href="{% url 'register' %}" class="hover:text-white transition">Create Free Account</a></li>
+                        <li><span class="text-gray-400">100 Free Monthly Queries</span></li>
+                        <li><span class="text-gray-400">Private &amp; Secure Data</span></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-gray-500 text-[11px]">
+                <p>&copy; {% now "Y" %} FitFusion.ai &bull; All Rights Reserved. AI-Powered Fashion Recommendation System.</p>
+                <div class="flex items-center gap-6">
+                    <a href="{% url 'home' %}" class="hover:text-gray-300 transition">Privacy</a>
+                    <a href="{% url 'home' %}" class="hover:text-gray-300 transition">Terms</a>
+                    <a href="{% url 'home' %}" class="hover:text-gray-300 transition">Security</a>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
 </body>
-
 </html>
