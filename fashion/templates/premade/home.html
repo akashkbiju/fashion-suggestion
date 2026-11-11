@@ -129,6 +129,7 @@
                 <!-- Desktop Nav Links -->
                 <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-300">
                     <a href="#features" class="hover:text-white transition">Features</a>
+                    <a href="#aesthetics" class="hover:text-white transition">Aesthetics</a>
                     <a href="#how-it-works" class="hover:text-white transition">How It Works</a>
                     <a href="#piece-inspo" class="hover:text-white transition">Piece Inspo</a>
                     <a href="#demo-preview" class="hover:text-white transition">Style Preview</a>
@@ -178,6 +179,7 @@
              @click.away="mobileMenu = false"
              class="md:hidden bg-slate-950/95 border-b border-white/10 px-6 py-6 space-y-4 text-center">
             <a @click="mobileMenu = false" href="#features" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">Features</a>
+            <a @click="mobileMenu = false" href="#aesthetics" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">Aesthetics</a>
             <a @click="mobileMenu = false" href="#how-it-works" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">How It Works</a>
             <a @click="mobileMenu = false" href="#piece-inspo" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">Piece Inspo</a>
             <a @click="mobileMenu = false" href="#demo-preview" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">Style Preview</a>
@@ -626,6 +628,201 @@
 
             </div>
 
+        </div>
+    </section>
+
+    <!-- Trending Aesthetics & Wardrobe Styles -->
+    <section id="aesthetics" class="py-24 bg-gradient-to-b from-slate-950/80 to-slate-900/50 border-t border-white/5 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-xs font-semibold text-rose-400">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>Curated Wardrobe Moodboards</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+                    Trending Aesthetics Curated by AI
+                </h2>
+                <p class="text-sm sm:text-base text-gray-400 font-light">
+                    Explore high-fashion style profiles designed by our algorithmic curation engine. Select an aesthetic to discover harmonious wardrobe formulas.
+                </p>
+            </div>
+
+            <!-- Aesthetic Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Aesthetic 1: Quiet Luxury -->
+                <div class="dark-glass-card rounded-3xl p-6 border border-white/10 hover:border-amber-500/30 transition-all duration-300 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl group-hover:scale-110 transition duration-300">
+                            <i class="fa-solid fa-gem"></i>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400">Old Money &bull; Minimal</span>
+                            <h3 class="text-lg font-bold text-white mt-0.5">Quiet Luxury</h3>
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed font-light">
+                            Understated opulence focused on rich textures, cashmere knitwear, and unbranded bespoke tailoring.
+                        </p>
+                        
+                        <div class="space-y-2 pt-2 border-t border-white/5 text-xs text-gray-300">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                <span>Double-faced camel wool blazer</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                <span>Pleated ivory flannel trousers</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                <span>Burnished Belgian leather loafers</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/5 flex items-center justify-between">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#E5D3B3] border border-white/20" title="Cashmere Ecru"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#8C765C] border border-white/20" title="Camel"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#1A1A1A] border border-white/20" title="Deep Onyx"></span>
+                        </div>
+                        <a href="{% url 'fashion_recommend' %}" class="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1">
+                            <span>Explore</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Aesthetic 2: Streetwear Luxe -->
+                <div class="dark-glass-card rounded-3xl p-6 border border-white/10 hover:border-rose-500/30 transition-all duration-300 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl group-hover:scale-110 transition duration-300">
+                            <i class="fa-solid fa-fire"></i>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-rose-400">Urban &bull; Modern</span>
+                            <h3 class="text-lg font-bold text-white mt-0.5">Streetwear Luxe</h3>
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed font-light">
+                            High-end casual silhouettes combining oversized tailored outerwear with technical luxury fabrics.
+                        </p>
+                        
+                        <div class="space-y-2 pt-2 border-t border-white/5 text-xs text-gray-300">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                                <span>Boxy heavyweight cotton hoodie</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                                <span>Wide-leg structured cargo denim</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                                <span>Architectural low-top trainers</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/5 flex items-center justify-between">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#111827] border border-white/20" title="Matte Black"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#64748B] border border-white/20" title="Gunmetal"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#E11D48] border border-white/20" title="Crimson Accent"></span>
+                        </div>
+                        <a href="{% url 'fashion_recommend' %}" class="text-xs font-bold text-rose-400 hover:text-rose-300 flex items-center gap-1">
+                            <span>Explore</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Aesthetic 3: Dark Academia -->
+                <div class="dark-glass-card rounded-3xl p-6 border border-white/10 hover:border-purple-500/30 transition-all duration-300 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl group-hover:scale-110 transition duration-300">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-purple-400">Vintage &bull; Literary</span>
+                            <h3 class="text-lg font-bold text-white mt-0.5">Dark Academia</h3>
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed font-light">
+                            Nostalgic collegiate layering with houndstooth fabrics, cable-knit sweaters, and tailored wool coats.
+                        </p>
+                        
+                        <div class="space-y-2 pt-2 border-t border-white/5 text-xs text-gray-300">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                                <span>Ribbed merino wool turtleneck</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                                <span>Herringbone wool trench coat</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                                <span>Black polished Chelsea boots</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/5 flex items-center justify-between">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#4A3728] border border-white/20" title="Coffee Brown"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#2E3B2E] border border-white/20" title="Forest Green"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#3F2B47] border border-white/20" title="Deep Plum"></span>
+                        </div>
+                        <a href="{% url 'fashion_recommend' %}" class="text-xs font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1">
+                            <span>Explore</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Aesthetic 4: Clean Girl & Minimalist -->
+                <div class="dark-glass-card rounded-3xl p-6 border border-white/10 hover:border-emerald-500/30 transition-all duration-300 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 transition duration-300">
+                            <i class="fa-solid fa-sparkles"></i>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Sleek &bull; Timeless</span>
+                            <h3 class="text-lg font-bold text-white mt-0.5">Minimalist Chic</h3>
+                        </div>
+                        <p class="text-xs text-gray-400 leading-relaxed font-light">
+                            Crisp neutrals, seamless drape, and effortless everyday poise designed for clean contemporary styling.
+                        </p>
+                        
+                        <div class="space-y-2 pt-2 border-t border-white/5 text-xs text-gray-300">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span>Crisp poplin oversized shirt</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span>High-rise straight washed denim</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span>Minimal white court sneakers</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/5 flex items-center justify-between">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#FFFFFF] border border-white/20" title="Crisp White"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#CBD5E1] border border-white/20" title="Cool Grey"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-[#94A3B8] border border-white/20" title="Slate"></span>
+                        </div>
+                        <a href="{% url 'fashion_recommend' %}" class="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1">
+                            <span>Explore</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </section>
 
