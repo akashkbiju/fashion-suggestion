@@ -1,60 +1,342 @@
-<!-- templates/code_review/owner_dashboard.html -->
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Executive Owner Dashboard &bull; FitFusion AI{% endblock %}
+
+{% block extra_css %}
+<!-- Google Fonts & Tailwind -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    serif: ['"Playfair Display"', 'serif'],
+                },
+                colors: {
+                    brand: {
+                        500: '#e11d48',
+                        600: '#be123c',
+                    }
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .studio-gradient {
+        background: radial-gradient(circle at 10% 10%, rgba(225, 29, 72, 0.06) 0%, transparent 40%),
+                    radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.06) 0%, transparent 40%),
+                    #F8FAFC;
+    }
+    .btn-gradient {
+        background: linear-gradient(135deg, #e11d48 0%, #9333ea 50%, #4f46e5 100%);
+        background-size: 200% auto;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-gradient:hover {
+        background-position: right center;
+        box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4);
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block hero_section %}
+<!-- Executive Banner -->
+<div class="relative overflow-hidden bg-slate-900 py-12 px-4 sm:px-6 lg:px-8 border-b border-white/10 text-white">
+    <div class="absolute -top-24 -left-24 w-80 h-80 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-xs font-semibold text-rose-300 mb-2">
+                <i class="fa-solid fa-crown text-amber-400"></i>
+                <span>FitFusion Owner Administration</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Executive Management Center
+            </h1>
+            <p class="text-xs sm:text-sm text-gray-300 mt-1">
+                Moderating community reviews, monitoring member query utilization, and managing database state.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="/admin/" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold text-white transition">
+                <i class="fa-solid fa-database text-purple-400"></i>
+                <span>Open Django Admin</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+            <a href="{% url 'home' %}#feedback" class="btn-gradient px-4 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg flex items-center gap-2">
+                <i class="fa-solid fa-eye"></i>
+                <span>View Public Home Page</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="relative max-w-7xl mx-auto mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-slate-800/80 rounded-2xl p-4 border border-white/10 backdrop-blur-md">
+            <span class="text-xs text-gray-400 block">Total Reviews</span>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="text-2xl font-extrabold text-white">{{ total_feedbacks }}</span>
+                <span class="text-[11px] font-semibold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">Feedback</span>
+            </div>
+        </div>
+
+        <div class="bg-slate-800/80 rounded-2xl p-4 border border-white/10 backdrop-blur-md">
+            <span class="text-xs text-gray-400 block">Average Rating</span>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="text-2xl font-extrabold text-amber-400">{{ avg_rating }}</span>
+                <div class="flex text-amber-400 text-xs">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-800/80 rounded-2xl p-4 border border-white/10 backdrop-blur-md">
+            <span class="text-xs text-gray-400 block">Featured on Home</span>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="text-2xl font-extrabold text-emerald-400">{{ featured_count }}</span>
+                <span class="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">Live</span>
+            </div>
+        </div>
+
+        <div class="bg-slate-800/80 rounded-2xl p-4 border border-white/10 backdrop-blur-md">
+            <span class="text-xs text-gray-400 block">Active Users</span>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="text-2xl font-extrabold text-indigo-400">{{ user_stats|length }}</span>
+                <span class="text-[11px] font-semibold text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded-full">Members</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-2xl font-bold mb-6">Owner Dashboard</h1>
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div class="px-4 py-5 sm:px-6">
-            <h2 class="text-lg leading-6 font-medium text-gray-900">
-                User Query Statistics for {{ current_month|date:"F Y" }}
-            </h2>
+<div class="min-h-screen studio-gradient py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto space-y-12">
+
+        <!-- Flash Messages -->
+        {% if messages %}
+            <div class="space-y-3">
+                {% for message in messages %}
+                    <div class="flex items-start gap-3 p-4 rounded-2xl text-sm {% if message.tags == 'error' %}bg-rose-50 border border-rose-200 text-rose-800{% elif message.tags == 'success' %}bg-emerald-50 border border-emerald-200 text-emerald-800{% else %}bg-amber-50 border border-amber-200 text-amber-800{% endif %} shadow-sm">
+                        <i class="fa-solid {% if message.tags == 'error' %}fa-circle-exclamation text-rose-500{% elif message.tags == 'success' %}fa-circle-check text-emerald-500{% else %}fa-triangle-exclamation text-amber-500{% endif %} mt-0.5"></i>
+                        <div class="flex-1 font-medium">{{ message }}</div>
+                        <button type="button" onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Section 1: Community Feedback Management -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+            
+            <div class="p-6 sm:p-8 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-extrabold text-gray-900 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-comments"></i>
+                        </span>
+                        <span>Community Feedback Moderation</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                        Control which reviews appear on the home page. Toggle visibility or delete spam entries.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-700">
+                        {{ feedbacks|length }} Submissions
+                    </span>
+                    <a href="/admin/fashion/feedback/" target="_blank" class="text-xs font-bold text-rose-600 hover:text-rose-700 flex items-center gap-1">
+                        <span>Django Admin Table</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Feedback Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-xs">
+                    <thead class="bg-slate-50 text-gray-500 uppercase tracking-wider font-semibold">
+                        <tr>
+                            <th class="px-6 py-3.5">Reviewer</th>
+                            <th class="px-6 py-3.5">Rating &amp; Topic</th>
+                            <th class="px-6 py-3.5">Review Comment</th>
+                            <th class="px-6 py-3.5">Date</th>
+                            <th class="px-6 py-3.5 text-center">Featured on Home</th>
+                            <th class="px-6 py-3.5 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-white">
+                        {% for fb in feedbacks %}
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <!-- Reviewer -->
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-gray-900">{{ fb.name }}</div>
+                                    <div class="text-gray-400 text-[11px] truncate max-w-xs">{{ fb.email|default:"No email provided" }}</div>
+                                    {% if fb.user %}
+                                        <span class="inline-block mt-0.5 text-[10px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded font-medium">
+                                            @{{ fb.user.username }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Rating & Topic -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex text-amber-400 text-xs gap-0.5 mb-1">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= fb.rating %}
+                                                <i class="fa-solid fa-star"></i>
+                                            {% else %}
+                                                <i class="fa-regular fa-star text-gray-300"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="text-gray-500 font-mono text-[11px] ml-1">({{ fb.rating }}.0)</span>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-100">
+                                        {{ fb.get_category_display }}
+                                    </span>
+                                </td>
+
+                                <!-- Comment -->
+                                <td class="px-6 py-4 max-w-md">
+                                    <p class="text-gray-700 leading-relaxed font-light">
+                                        {{ fb.comment }}
+                                    </p>
+                                </td>
+
+                                <!-- Date -->
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-400 text-[11px]">
+                                    {{ fb.created_at|date:"M d, Y" }}<br>
+                                    <span class="text-gray-300">{{ fb.created_at|date:"h:i A" }}</span>
+                                </td>
+
+                                <!-- Toggle Featured -->
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <a href="{% url 'toggle_feedback_featured' fb.id %}" 
+                                       title="Click to toggle visibility on Home Page"
+                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition {% if fb.is_featured %}bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100{% else %}bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200{% endif %}">
+                                        {% if fb.is_featured %}
+                                            <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                                            <span>Featured</span>
+                                        {% else %}
+                                            <i class="fa-solid fa-eye-slash text-gray-400"></i>
+                                            <span>Hidden</span>
+                                        {% endif %}
+                                    </a>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <a href="{% url 'delete_feedback' fb.id %}" 
+                                       onclick="return confirm('Are you sure you want to permanently delete feedback from {{ fb.name }}?');"
+                                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-rose-600 bg-rose-50 hover:bg-rose-100 transition font-semibold text-[11px]">
+                                        <i class="fa-solid fa-trash-can text-[10px]"></i>
+                                        <span>Delete</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center text-gray-400">
+                                    <i class="fa-solid fa-inbox text-3xl mb-2 text-gray-300"></i>
+                                    <p class="font-medium text-sm">No feedback submissions received yet.</p>
+                                    <p class="text-xs text-gray-400 mt-1">User reviews submitted on the home page will appear here for review.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="border-t border-gray-200">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Username
-                        </th>
-              
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Chat Queries
-                        </th>
-                        {% comment %} <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            File Queries
-                        </th> {% endcomment %}
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Total / Limit
-                        </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Action
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for stat in user_stats %}
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {{ stat.username }}
-                        </td>
-                
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ stat.chat_queries }}
-                        </td>
-                        {% comment %} <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ stat.file_queries }}
-                        </td> {% endcomment %}
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ stat.total_queries }} / {{ stat.query_limit }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <a href="{% url 'delete_user' username=stat.username %}">Delete</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        <!-- Section 2: User Activity & Query Statistics -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+            
+            <div class="p-6 sm:p-8 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-extrabold text-gray-900 flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-users"></i>
+                        </span>
+                        <span>User Query Quotas &bull; {{ current_month|date:"F Y" }}</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                        Review member query consumption across Live, Chat, and File similarity searches.
+                    </p>
+                </div>
+
+                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-700">
+                    {{ user_stats|length }} Members
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-left text-xs">
+                    <thead class="bg-slate-50 text-gray-500 uppercase tracking-wider font-semibold">
+                        <tr>
+                            <th class="px-6 py-3.5">User Details</th>
+                            <th class="px-6 py-3.5">Live Queries</th>
+                            <th class="px-6 py-3.5">Chat Queries</th>
+                            <th class="px-6 py-3.5">File / Inspo Queries</th>
+                            <th class="px-6 py-3.5">Usage vs Quota</th>
+                            <th class="px-6 py-3.5 text-right">Account Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 bg-white">
+                        {% for stat in user_stats %}
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-gray-900">{{ stat.username }}</div>
+                                    <div class="text-gray-400 text-[11px]">{{ stat.email|default:"No email registered" }}</div>
+                                </td>
+                                <td class="px-6 py-4 font-mono text-gray-600">{{ stat.live_queries }}</td>
+                                <td class="px-6 py-4 font-mono text-gray-600">{{ stat.chat_queries }}</td>
+                                <td class="px-6 py-4 font-mono text-gray-600">{{ stat.file_queries }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2 font-mono">
+                                        <span class="font-bold {% if stat.total_queries >= stat.query_limit %}text-rose-600{% else %}text-gray-900{% endif %}">
+                                            {{ stat.total_queries }}
+                                        </span>
+                                        <span class="text-gray-400">/ {{ stat.query_limit }}</span>
+                                    </div>
+                                    <div class="w-24 bg-gray-100 h-1.5 rounded-full overflow-hidden mt-1">
+                                        <div class="h-full {% if stat.total_queries >= stat.query_limit %}bg-rose-500{% else %}bg-indigo-500{% endif %}" 
+                                             style="width: {% widthratio stat.total_queries stat.query_limit 100 %}%;"></div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <a href="{% url 'delete_user' username=stat.username %}" 
+                                       onclick="return confirm('Permanently remove user {{ stat.username }}?');"
+                                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-rose-600 bg-rose-50 hover:bg-rose-100 transition font-semibold text-[11px]">
+                                        <i class="fa-solid fa-user-xmark text-[10px]"></i>
+                                        <span>Delete User</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="px-6 py-10 text-center text-gray-400">
+                                    No non-owner users registered yet.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+
     </div>
 </div>
 {% endblock %}
