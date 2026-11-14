@@ -28,8 +28,8 @@ import time
 import google.generativeai as genai
 from groq import Groq
 
-from .models import PlagarismChat, UserQueryCount, CustomUser
-from .forms import CustomUserCreationForm, LoginForm
+from .models import PlagarismChat, UserQueryCount, CustomUser, Feedback
+from .forms import CustomUserCreationForm, LoginForm, FeedbackForm
 
 # Configuration
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
@@ -187,7 +187,45 @@ def get_outfit_recommendation(prompt):
 
 
 def home(request):
-    return render(request, 'premade/home.html')
+    featured_feedbacks = Feedback.objects.filter(is_featured=True).order_by('-created_at')[:6]
+    feedback_form = FeedbackForm()
+    return render(request, 'premade/home.html', {
+        'feedbacks': featured_feedbacks,
+        'feedback_form': feedback_form,
+    })
+
+
+@require_http_methods(["POST"])
+def submit_feedback(request):
+    form = FeedbackForm(request.POST)
+    if form.is_valid():
+        feedback = form.save(commit=False)
+        if request.user.is_authenticated:
+            feedback.user = request.user
+            if not feedback.name:
+                feedback.name = request.user.get_full_name() or request.user.username
+            if not feedback.email:
+                feedback.email = request.user.email
+        feedback.save()
+
+        # Support AJAX or JSON fetch requests
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Thank you! Your feedback has been received and helps us elevate our AI stylist.',
+                'name': feedback.name,
+                'rating': feedback.rating,
+                'category': feedback.get_category_display(),
+            })
+
+        messages.success(request, 'Thank you! Your feedback has been submitted successfully.')
+        return redirect('home')
+    else:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+        messages.error(request, 'Please complete all required feedback fields.')
+        return redirect('home')
+
 
 
 def is_owner(user):
