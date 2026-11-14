@@ -41,3 +41,28 @@ class UserQueryCount(models.Model):
             query_count.file_queries += 1
             
         query_count.save()
+
+
+class Feedback(models.Model):
+    CATEGORY_CHOICES = [
+        ('outfit_recs', 'Outfit Recommendations'),
+        ('piece_inspo', 'Piece Inspo & Matching'),
+        ('ui_ux', 'Design & User Experience'),
+        ('feature_request', 'Feature Request / Idea'),
+        ('general', 'General Feedback'),
+    ]
+
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    email = models.EmailField(blank=True, null=True)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='general')
+    rating = models.PositiveSmallIntegerField(default=5)  # 1 to 5 stars
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_featured = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.rating}★ ({self.get_category_display()})"
