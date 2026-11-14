@@ -7,6 +7,8 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('owner-dashboard/', views.owner_dashboard, name='owner_dashboard'),
+    path('owner/feedback/toggle/<int:feedback_id>/', views.toggle_feedback_featured, name='toggle_feedback_featured'),
+    path('owner/feedback/delete/<int:feedback_id>/', views.delete_feedback, name='delete_feedback'),
     path('feedback/', views.submit_feedback, name='submit_feedback'),
 
     # Auth

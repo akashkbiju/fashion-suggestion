@@ -330,6 +330,7 @@ def owner_dashboard(request):
         if query_count:
             user_stats.append({
                 'username': user.username,
+                'email': user.email,
                 'live_queries': query_count.live_queries,
                 'chat_queries': query_count.chat_queries,
                 'file_queries': query_count.file_queries,
@@ -341,6 +342,7 @@ def owner_dashboard(request):
         else:
             user_stats.append({
                 'username': user.username,
+                'email': user.email,
                 'live_queries': 0,
                 'chat_queries': 0,
                 'file_queries': 0,
@@ -348,11 +350,44 @@ def owner_dashboard(request):
                 'query_limit': user.query_limit
             })
     
+    # Query all Feedback for Owner Admin Management
+    all_feedbacks = Feedback.objects.all().order_by('-created_at')
+    total_feedbacks = all_feedbacks.count()
+    from django.db.models import Avg
+    avg_rating_val = all_feedbacks.aggregate(Avg('rating'))['rating__avg']
+    avg_rating = round(avg_rating_val, 1) if avg_rating_val else 5.0
+    featured_count = all_feedbacks.filter(is_featured=True).count()
+
     context = {
         'user_stats': user_stats,
-        'current_month': current_month
+        'current_month': current_month,
+        'feedbacks': all_feedbacks,
+        'total_feedbacks': total_feedbacks,
+        'avg_rating': avg_rating,
+        'featured_count': featured_count,
     }
     return render(request, 'owner_dashboard.html', context)
+
+
+@login_required
+@user_passes_test(is_owner)
+def toggle_feedback_featured(request, feedback_id):
+    feedback = get_object_or_404(Feedback, id=feedback_id)
+    feedback.is_featured = not feedback.is_featured
+    feedback.save()
+    status_str = "featured on the home page" if feedback.is_featured else "hidden from the home page"
+    messages.success(request, f"Feedback from '{feedback.name}' is now {status_str}.")
+    return redirect('owner_dashboard')
+
+
+@login_required
+@user_passes_test(is_owner)
+def delete_feedback(request, feedback_id):
+    feedback = get_object_or_404(Feedback, id=feedback_id)
+    name = feedback.name
+    feedback.delete()
+    messages.success(request, f"Feedback from '{name}' has been deleted.")
+    return redirect('owner_dashboard')
 
 
 @login_required
