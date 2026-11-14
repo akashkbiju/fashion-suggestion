@@ -146,6 +146,24 @@
 
         </div>
 
+        <!-- Member Feedback Banner -->
+        <div class="bg-gradient-to-r from-slate-900 to-slate-950 rounded-3xl p-6 sm:p-8 text-white border border-white/10 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="space-y-1 text-center sm:text-left">
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 justify-center sm:justify-start">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Your Opinion Matters</span>
+                </span>
+                <h3 class="text-lg font-bold text-white">How are your AI style recommendations?</h3>
+                <p class="text-xs text-gray-300 max-w-xl font-light leading-relaxed">
+                    Help us fine-tune our computer vision similarity matching and outfit formulas by sharing quick feedback.
+                </p>
+            </div>
+            <a href="{% url 'home' %}#feedback" class="px-6 py-3 rounded-2xl bg-white text-slate-950 hover:bg-gray-100 text-xs font-bold transition whitespace-nowrap shadow-md flex items-center gap-2">
+                <span>Share Feedback</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+        </div>
+
     </div>
 </div>
 {% endblock %}

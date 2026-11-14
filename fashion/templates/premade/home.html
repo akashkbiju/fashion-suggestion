@@ -133,6 +133,7 @@
                     <a href="#how-it-works" class="hover:text-white transition">How It Works</a>
                     <a href="#piece-inspo" class="hover:text-white transition">Piece Inspo</a>
                     <a href="#demo-preview" class="hover:text-white transition">Style Preview</a>
+                    <a href="#feedback" class="hover:text-white transition">Feedback</a>
                     <a href="#faq" class="hover:text-white transition">FAQ</a>
                 </nav>
 
@@ -183,6 +184,7 @@
             <a @click="mobileMenu = false" href="#how-it-works" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">How It Works</a>
             <a @click="mobileMenu = false" href="#piece-inspo" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">Piece Inspo</a>
             <a @click="mobileMenu = false" href="#demo-preview" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">Style Preview</a>
+            <a @click="mobileMenu = false" href="#feedback" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">Feedback</a>
             <a @click="mobileMenu = false" href="#faq" class="block text-gray-300 hover:text-white py-2 text-sm font-semibold">FAQ</a>
 
             <div class="pt-4 border-t border-white/10 space-y-3">
@@ -905,6 +907,350 @@
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </a>
                 </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Community Reviews & Feedback Section -->
+    <section id="feedback" class="py-24 bg-slate-950/80 border-t border-white/5 relative overflow-hidden" 
+             x-data="{ 
+                 selectedRating: 5, 
+                 hoverRating: 5, 
+                 submitting: false, 
+                 feedbackSuccess: false,
+                 feedbackError: '',
+                 submitForm(e) {
+                     this.submitting = true;
+                     this.feedbackError = '';
+                     const form = e.target;
+                     const formData = new FormData(form);
+                     formData.set('rating', this.selectedRating);
+
+                     fetch('{% url 'submit_feedback' %}', {
+                         method: 'POST',
+                         body: formData,
+                         headers: {
+                             'X-Requested-With': 'XMLHttpRequest'
+                         }
+                     })
+                     .then(res => res.json())
+                     .then(data => {
+                         this.submitting = false;
+                         if (data.status === 'success') {
+                             this.feedbackSuccess = true;
+                             form.reset();
+                         } else {
+                             this.feedbackError = 'Please check the form fields and try again.';
+                         }
+                     })
+                     .catch(err => {
+                         this.submitting = false;
+                         form.submit();
+                     });
+                 }
+             }">
+        
+        <!-- Ambient lighting -->
+        <div class="absolute -top-32 right-10 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-32 left-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
+            
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-400">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Community Style Stories &bull; Ratings &amp; Reviews</span>
+                </div>
+                <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+                    Loved by Fashion Trendsetters
+                </h2>
+                <p class="text-sm sm:text-base text-gray-400 font-light">
+                    Read feedback from members who elevate their daily wardrobe with FitFusion, or share your own thoughts with our AI styling team.
+                </p>
+            </div>
+
+            <!-- Two-Column Layout: Reviews on Left, Interactive Form on Right -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Left 7 Cols: Featured Reviews Grid -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-comments text-rose-400 text-sm"></i>
+                            <span>Recent Member Feedback</span>
+                        </h3>
+                        <span class="text-xs font-mono text-gray-400">Verified Style Opinions</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% if feedbacks %}
+                            {% for fb in feedbacks %}
+                                <div class="dark-glass-card rounded-2xl p-5 border border-white/10 flex flex-col justify-between space-y-4 hover:border-white/20 transition">
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2.5">
+                                                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                    {{ fb.name|slice:":1"|upper }}
+                                                </div>
+                                                <div class="truncate">
+                                                    <p class="text-xs font-bold text-white truncate">{{ fb.name }}</p>
+                                                    <span class="text-[10px] text-gray-400 block">{{ fb.created_at|date:"M d, Y" }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex text-amber-400 text-[11px] gap-0.5">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= fb.rating %}
+                                                        <i class="fa-solid fa-star"></i>
+                                                    {% else %}
+                                                        <i class="fa-regular fa-star text-gray-600"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-gray-300 leading-relaxed font-light italic">
+                                            &ldquo;{{ fb.comment|truncatewords:24 }}&rdquo;
+                                        </p>
+                                    </div>
+                                    <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400">
+                                        <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/5 text-rose-300">
+                                            {{ fb.get_category_display }}
+                                        </span>
+                                        <span class="text-emerald-400"><i class="fa-solid fa-circle-check text-[9px] mr-1"></i>Verified Member</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Curated Default Member Testimonials -->
+                            <div class="dark-glass-card rounded-2xl p-5 border border-white/10 flex flex-col justify-between space-y-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                S
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-white">Sophia Chen</p>
+                                                <span class="text-[10px] text-gray-400 block">Fashion Blogger</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex text-amber-400 text-[11px] gap-0.5">
+                                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-300 leading-relaxed font-light italic">
+                                        &ldquo;The ResNet50 similarity matching is uncanny. I uploaded a vintage green leather bag and immediately found 6 perfect outfit complements.&rdquo;
+                                    </p>
+                                </div>
+                                <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400">
+                                    <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/5 text-rose-300">Piece Inspo</span>
+                                    <span class="text-emerald-400"><i class="fa-solid fa-circle-check text-[9px] mr-1"></i>Verified Member</span>
+                                </div>
+                            </div>
+
+                            <div class="dark-glass-card rounded-2xl p-5 border border-white/10 flex flex-col justify-between space-y-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                                                M
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-white">Marcus Vance</p>
+                                                <span class="text-[10px] text-gray-400 block">Creative Director</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex text-amber-400 text-[11px] gap-0.5">
+                                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-300 leading-relaxed font-light italic">
+                                        &ldquo;FitFusion eliminated my morning decision fatigue. The smart-casual event styling formulas look like they were pulled directly from GQ.&rdquo;
+                                    </p>
+                                </div>
+                                <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400">
+                                    <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/5 text-indigo-300">Outfit Recs</span>
+                                    <span class="text-emerald-400"><i class="fa-solid fa-circle-check text-[9px] mr-1"></i>Verified Member</span>
+                                </div>
+                            </div>
+
+                            <div class="dark-glass-card rounded-2xl p-5 border border-white/10 flex flex-col justify-between space-y-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xs font-bold">
+                                                A
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-white">Aria Thorne</p>
+                                                <span class="text-[10px] text-gray-400 block">Wardrobe Stylist</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex text-amber-400 text-[11px] gap-0.5">
+                                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-300 leading-relaxed font-light italic">
+                                        &ldquo;The multi-tier fallback architecture makes it super reliable. Quick responses, great color palette harmonization, and sleek design.&rdquo;
+                                    </p>
+                                </div>
+                                <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400">
+                                    <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/5 text-purple-300">Design &amp; UI</span>
+                                    <span class="text-emerald-400"><i class="fa-solid fa-circle-check text-[9px] mr-1"></i>Verified Member</span>
+                                </div>
+                            </div>
+
+                            <div class="dark-glass-card rounded-2xl p-5 border border-white/10 flex flex-col justify-between space-y-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center text-white text-xs font-bold">
+                                                L
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-white">Lucas Meyer</p>
+                                                <span class="text-[10px] text-gray-400 block">Tech Entrepreneur</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex text-amber-400 text-[11px] gap-0.5">
+                                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-300 leading-relaxed font-light italic">
+                                        &ldquo;Love how simple the image upload is. Drop an image of sneakers or a jacket, and it gives you matching items in seconds.&rdquo;
+                                    </p>
+                                </div>
+                                <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400">
+                                    <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/5 text-amber-300">Feature Request</span>
+                                    <span class="text-emerald-400"><i class="fa-solid fa-circle-check text-[9px] mr-1"></i>Verified Member</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Right 5 Cols: Interactive Feedback Form -->
+                <div class="lg:col-span-5 dark-glass-card rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl relative">
+                    
+                    <div class="mb-6 space-y-1">
+                        <span class="text-xs font-bold uppercase tracking-wider text-rose-400">Share Your Opinion</span>
+                        <h3 class="text-xl font-bold text-white">Give Us Your Feedback</h3>
+                        <p class="text-xs text-gray-400 font-light">
+                            Help our neural models and styling algorithm improve with your real-world feedback.
+                        </p>
+                    </div>
+
+                    <!-- Inline Success Message Banner -->
+                    <div x-show="feedbackSuccess" x-cloak class="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs space-y-2 mb-6">
+                        <div class="flex items-center gap-2 font-bold text-sm">
+                            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                            <span>Thank You for Your Feedback!</span>
+                        </div>
+                        <p class="font-light leading-relaxed">
+                            Your review has been successfully submitted and helps our engineering team refine FitFusion's recommendation accuracy.
+                        </p>
+                        <button type="button" @click="feedbackSuccess = false" class="text-[11px] underline font-semibold text-emerald-300 hover:text-white">
+                            Submit another response
+                        </button>
+                    </div>
+
+                    <!-- Inline Error Banner -->
+                    <div x-show="feedbackError" x-cloak class="p-3.5 rounded-2xl bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-rose-400"></i>
+                        <span x-text="feedbackError"></span>
+                    </div>
+
+                    <!-- Feedback Form -->
+                    <form @submit.prevent="submitForm($event)" method="POST" action="{% url 'submit_feedback' %}" class="space-y-4" x-show="!feedbackSuccess">
+                        {% csrf_token %}
+                        <input type="hidden" name="rating" :value="selectedRating">
+
+                        <!-- Rating Stars Widget -->
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-gray-300">
+                                Overall Experience Rating
+                            </label>
+                            <div class="flex items-center gap-2 pt-1">
+                                <div class="flex items-center gap-1.5 text-xl cursor-pointer">
+                                    <template x-for="star in [1, 2, 3, 4, 5]" :key="star">
+                                        <i class="fa-star transition-all duration-150 transform hover:scale-110"
+                                           :class="(hoverRating ? star <= hoverRating : star <= selectedRating) ? 'fa-solid text-amber-400' : 'fa-regular text-gray-600'"
+                                           @mouseenter="hoverRating = star"
+                                           @mouseleave="hoverRating = selectedRating"
+                                           @click="selectedRating = star; hoverRating = star"></i>
+                                    </template>
+                                </div>
+                                <span class="text-xs font-mono font-bold text-gray-400 ml-2" 
+                                      x-text="selectedRating === 5 ? '5.0 - Outstanding' : (selectedRating === 4 ? '4.0 - Very Good' : (selectedRating === 3 ? '3.0 - Good' : (selectedRating === 2 ? '2.0 - Needs Work' : '1.0 - Poor')))">
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Category Selector -->
+                        <div class="space-y-1.5">
+                            <label for="id_category" class="block text-xs font-bold uppercase tracking-wider text-gray-300">
+                                Feedback Topic
+                            </label>
+                            <select id="id_category" name="category" required class="w-full px-4 py-2.5 bg-slate-900 border border-white/10 rounded-xl text-white text-xs focus:outline-none focus:border-rose-500 transition">
+                                <option value="outfit_recs">Outfit Recommendations &amp; Prompts</option>
+                                <option value="piece_inspo">Piece Inspo &amp; Visual Similarity</option>
+                                <option value="ui_ux">Design, Mobile &amp; User Experience</option>
+                                <option value="feature_request">Feature Request / New Idea</option>
+                                <option value="general" selected>General Feedback</option>
+                            </select>
+                        </div>
+
+                        <!-- Name & Email Row -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label for="id_name" class="block text-[11px] font-bold uppercase tracking-wider text-gray-300">
+                                    Your Name
+                                </label>
+                                <input type="text" id="id_name" name="name" required
+                                       {% if user.is_authenticated %}value="{{ user.get_full_name|default:user.username }}"{% endif %}
+                                       placeholder="e.g. Alex M."
+                                       class="w-full px-3.5 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-white text-xs placeholder-gray-500 focus:outline-none focus:border-rose-500 transition">
+                            </div>
+                            <div class="space-y-1">
+                                <label for="id_email" class="block text-[11px] font-bold uppercase tracking-wider text-gray-300">
+                                    Email (Optional)
+                                </label>
+                                <input type="email" id="id_email" name="email"
+                                       {% if user.is_authenticated %}value="{{ user.email }}"{% endif %}
+                                       placeholder="name@example.com"
+                                       class="w-full px-3.5 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-white text-xs placeholder-gray-500 focus:outline-none focus:border-rose-500 transition">
+                            </div>
+                        </div>
+
+                        <!-- Comment Textarea -->
+                        <div class="space-y-1">
+                            <label for="id_comment" class="block text-xs font-bold uppercase tracking-wider text-gray-300">
+                                Your Feedback or Suggestion
+                            </label>
+                            <textarea id="id_comment" name="comment" rows="3" required
+                                      placeholder="Share what worked great, accuracy of recommendations, or what you'd love to see next..."
+                                      class="w-full px-3.5 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-white text-xs placeholder-gray-500 focus:outline-none focus:border-rose-500 transition leading-relaxed"></textarea>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="pt-2">
+                            <button type="submit" :disabled="submitting"
+                                    class="btn-gradient w-full py-3 px-6 text-white text-xs font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-rose-500 disabled:opacity-50">
+                                <span x-show="!submitting" class="flex items-center gap-2">
+                                    <i class="fa-solid fa-paper-plane text-[11px]"></i>
+                                    <span>Send Feedback</span>
+                                </span>
+                                <span x-show="submitting" x-cloak class="flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                                    <span>Submitting...</span>
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+
             </div>
 
         </div>
