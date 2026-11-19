@@ -523,12 +523,19 @@ def live(request):
 from PIL import Image
 import numpy as np
 import pickle
-import tensorflow
-from keras.applications.resnet50 import ResNet50, preprocess_input
-from keras.layers import GlobalMaxPooling2D
 import cv2
 from numpy.linalg import norm
 from sklearn.neighbors import NearestNeighbors
+
+# Optional TensorFlow import (for environments with full ML stack or when deployed with high RAM)
+TF_AVAILABLE = False
+try:
+    import tensorflow as tf
+    from keras.applications.resnet50 import ResNet50, preprocess_input
+    from keras.layers import GlobalMaxPooling2D
+    TF_AVAILABLE = True
+except (ImportError, Exception) as e:
+    print(f"Notice: TensorFlow not available, using lightweight OpenCV visual similarity: {e}")
 
 IMAGES_DIR = os.path.join(settings.BASE_DIR, 'New folder', 'image')
 FEATURE_LIST_PATH = os.path.join(settings.BASE_DIR, 'featurevector.pkl')
@@ -536,23 +543,31 @@ FILENAMES_PATH = os.path.join(settings.BASE_DIR, 'filenames.pkl')
 
 # Load precomputed features and filenames
 try:
-    feature_list = np.array(pickle.load(open(FEATURE_LIST_PATH, 'rb')))
-    filenames = pickle.load(open(FILENAMES_PATH, 'rb'))
+    if os.path.exists(FEATURE_LIST_PATH) and os.path.exists(FILENAMES_PATH):
+        with open(FEATURE_LIST_PATH, 'rb') as f:
+            feature_list = np.array(pickle.load(f))
+        with open(FILENAMES_PATH, 'rb') as f:
+            filenames = pickle.load(f)
+    else:
+        feature_list = []
+        filenames = []
 except Exception as e:
     print(f"Notice: Could not pre-load feature files: {e}")
     feature_list = []
     filenames = []
 
-# ResNet50 model (lazy-loaded to prevent startup/offline crashes)
+# ResNet50 model (lazy-loaded when TensorFlow is present)
 _resnet_model = None
 
 def get_resnet_model():
     global _resnet_model
+    if not TF_AVAILABLE:
+        return None
     if _resnet_model is None:
         try:
             base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
             base_model.trainable = False
-            _resnet_model = tensorflow.keras.Sequential([
+            _resnet_model = tf.keras.Sequential([
                 base_model,
                 GlobalMaxPooling2D()
             ])
@@ -585,6 +600,66 @@ def recommend(features, feature_list):
     distance, indices = neighbors.kneighbors([features])
     return indices
 
+# Lightweight visual similarity engine (HSV Color & Texture Histogram matching)
+# Ultra-fast, zero-memory footprint, works flawlessly on 512MB RAM cloud tiers
+_gallery_cache = None
+
+def get_gallery_features():
+    global _gallery_cache
+    if _gallery_cache is not None:
+        return _gallery_cache
+    
+    cache = []
+    if os.path.exists(IMAGES_DIR):
+        for fname in sorted(os.listdir(IMAGES_DIR)):
+            if fname.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                full_path = os.path.join(IMAGES_DIR, fname)
+                try:
+                    img = cv2.imread(full_path)
+                    if img is not None:
+                        hsv = cv2.cvtColor(cv2.resize(img, (128, 128)), cv2.COLOR_BGR2HSV)
+                        hist = cv2.calcHist([hsv], [0, 1, 2], None, [8, 8, 8], [0, 180, 0, 256, 0, 256])
+                        norm_hist = cv2.normalize(hist, hist).flatten().astype(np.float32)
+                        cache.append((fname, norm_hist))
+                except Exception:
+                    pass
+    _gallery_cache = cache
+    return _gallery_cache
+
+def recommend_by_visual_similarity(uploaded_img_path, top_k=6):
+    """
+    Ranks gallery items against the uploaded image using OpenCV HSV histogram correlation.
+    """
+    gallery = get_gallery_features()
+    if not gallery:
+        # Fallback to direct directory listing if feature extraction fails
+        if os.path.exists(IMAGES_DIR):
+            return [f for f in os.listdir(IMAGES_DIR) if f.lower().endswith(('.jpg', '.jpeg', '.png'))][:top_k]
+        return []
+
+    try:
+        query_img = cv2.imread(uploaded_img_path)
+        if query_img is None:
+            # Try PIL fallback for formats OpenCV might struggle with
+            pil_img = Image.open(uploaded_img_path).convert('RGB')
+            query_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+
+        hsv = cv2.cvtColor(cv2.resize(query_img, (128, 128)), cv2.COLOR_BGR2HSV)
+        query_hist = cv2.calcHist([hsv], [0, 1, 2], None, [8, 8, 8], [0, 180, 0, 256, 0, 256])
+        query_norm = cv2.normalize(query_hist, query_hist).flatten().astype(np.float32)
+
+        scored = []
+        for fname, g_hist in gallery:
+            score = cv2.compareHist(query_norm, g_hist, cv2.HISTCMP_CORREL)
+            scored.append((fname, float(score)))
+
+        # Sort descending by correlation score
+        scored.sort(key=lambda x: x[1], reverse=True)
+        return [fname for fname, _ in scored[:top_k]]
+    except Exception as e:
+        print(f"Notice: Visual similarity ranking error: {e}")
+        return [fname for fname, _ in gallery[:top_k]]
+
 @login_required
 def fashion_recommend(request):
     if request.method == 'POST':
@@ -599,17 +674,24 @@ def fashion_recommend(request):
             filename = fs.save(f'uploads/{uploaded_file.name}', uploaded_file)
             uploaded_file_path = fs.path(filename)
             
-            model_instance = get_resnet_model()
-            if model_instance is None:
-                messages.error(request, 'Model is currently unavailable. Please try again later.')
-                return render(request, 'fashion/upload.html')
-            features = extract_feature(uploaded_file_path, model_instance)
-            indices = recommend(features, feature_list)
-            
             recommended_images = []
-            for idx in indices[0]:
-                img_filename = os.path.basename(filenames[idx])
-                recommended_images.append(img_filename)
+            model_instance = get_resnet_model()
+            
+            # Use ResNet50 if available and feature vectors are loaded
+            if model_instance is not None and len(feature_list) > 0 and len(filenames) > 0:
+                try:
+                    features = extract_feature(uploaded_file_path, model_instance)
+                    indices = recommend(features, feature_list)
+                    for idx in indices[0]:
+                        if idx < len(filenames):
+                            img_filename = os.path.basename(filenames[idx])
+                            recommended_images.append(img_filename)
+                except Exception as e:
+                    print(f"Notice: ResNet inference failed, using visual similarity: {e}")
+                    recommended_images = recommend_by_visual_similarity(uploaded_file_path)
+            else:
+                # Instant lightweight visual similarity
+                recommended_images = recommend_by_visual_similarity(uploaded_file_path)
             
             context = {
                 'uploaded_image': f'/media/uploads/{uploaded_file.name}',

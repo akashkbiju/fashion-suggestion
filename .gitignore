@@ -22,12 +22,10 @@ media/
 uploads/
 
 # Machine Learning models & large files
-*.pkl
 *.h5
 *.hdf5
 *.model
-featurevector.pkl
-filenames.pkl
+models/
 
 # Node / JS
 node_modules/
